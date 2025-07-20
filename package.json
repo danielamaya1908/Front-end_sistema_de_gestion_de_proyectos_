@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "postinstall": "if [ -f node_modules/.bin/vite ]; then chmod +x node_modules/.bin/vite; fi",
-    "build": "./node_modules/.bin/vite build",
+    "build": "node_modules/vite/bin/vite.js build",
     "preview": "vite preview",
     "start": "vite preview --port $PORT",
     "railway-build": "yarn install --frozen-lockfile --production=false --ignore-engines"
