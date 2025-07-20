@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 import axios from "axios";
 
 import Show from "./show";
-import Create from "./create";
+import Create from "./create"; // Ahora apunta a src/pages/users/create.tsx
 import Update from "./update";
 
 import Modal from "../../components/modalDashboard";
@@ -18,14 +18,11 @@ import SortFilter from "../../components/sortFilter";
 import ListView from "../../components/listView";
 import CardView from "../../components/cardView";
 
-interface UserItem {
-  id: string;
-  username: string;
-  email: string;
-  type: string;
-  dateCreation?: string;
-  name?: string;
-  description?: string;
+interface RoleItem {
+  id: number;
+  name: string;
+  description: string;
+  state?: string;
 }
 
 interface SortConfig {
@@ -34,9 +31,8 @@ interface SortConfig {
 }
 
 const Users: React.FC = () => {
-  const [apiData, setApiData] = useState<UserItem[]>([]);
+  const [apiData, setApiData] = useState<RoleItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element | null>(null);
@@ -57,7 +53,7 @@ const Users: React.FC = () => {
   const showList = () => setViewType("list");
 
   const API_URL =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -128,112 +124,31 @@ const Users: React.FC = () => {
   }, []);
 
   const fetchData = () => {
-    // Verificar que el token existe
-    if (!token) {
-      console.error("No hay token de sesión disponible");
-      toast.error(
-        "No hay token de sesión. Por favor, inicia sesión nuevamente."
-      );
-      return;
-    }
-
-    setLoading(true);
-
     axios
       .get(API_URL, {
         headers: {
           session_token: token,
           "Content-Type": "application/json",
-          Accept: "application/json",
         },
+        params: {},
       })
       .then((response) => {
-        console.log("Respuesta completa del API:", response.data);
-
-        // Verificar diferentes estructuras posibles de respuesta
-        let rawData = null;
-
-        if (response.data?.data) {
-          rawData = response.data.data;
-        } else if (response.data?.users) {
-          rawData = response.data.users;
-        } else if (Array.isArray(response.data)) {
-          rawData = response.data;
-        } else {
-          console.error(
-            "Estructura de respuesta no reconocida:",
-            response.data
-          );
-          toast.error("Formato de respuesta del servidor no válido");
-          return;
-        }
+        const rawData = response.data?.data;
 
         if (!Array.isArray(rawData)) {
-          console.error("Los datos no son un array:", rawData);
-          toast.error("Los datos recibidos no tienen el formato esperado");
+          console.error('Error: La propiedad "data" no es un array:', rawData);
           return;
         }
 
-        console.log("Datos de usuarios recibidos:", rawData);
-
         const cleanedData = rawData.map((item: any) => ({
-          id: item._id || item.id,
-          username: item.username || item.name || "Sin nombre",
-          email: item.email || "Sin email",
-          type: item.type || item.role || "Sin tipo",
-          dateCreation: item.dateCreation || item.createdAt || item.created_at,
-          // Mantener compatibilidad con el formato anterior
-          name: item.username || item.name || "Sin nombre",
-          description: `${item.email || "Sin email"} - ${
-            item.type || item.role || "Sin tipo"
-          }`,
+          id: item._id,
+          name: item.name,
+          description: item.description,
         }));
-
-        console.log("Datos procesados:", cleanedData);
         setApiData(cleanedData);
-
-        if (cleanedData.length === 0) {
-          toast.info("No se encontraron usuarios");
-        }
       })
       .catch((error) => {
-        console.error("Error completo:", error);
-
-        if (error.response) {
-          // El servidor respondió con un código de estado diferente a 2xx
-          console.error("Error de respuesta:", error.response.data);
-          console.error("Status:", error.response.status);
-          console.error("Headers:", error.response.headers);
-
-          if (error.response.status === 401) {
-            toast.error(
-              "Token de sesión inválido o expirado. Por favor, inicia sesión nuevamente."
-            );
-          } else if (error.response.status === 403) {
-            toast.error("No tienes permisos para acceder a esta información.");
-          } else if (error.response.status === 404) {
-            toast.error("Endpoint no encontrado. Verifica la URL del API.");
-          } else {
-            toast.error(
-              `Error del servidor: ${error.response.status} - ${
-                error.response.data?.message || "Error desconocido"
-              }`
-            );
-          }
-        } else if (error.request) {
-          // La petición fue hecha pero no se recibió respuesta
-          console.error("Error de red:", error.request);
-          toast.error(
-            "Error de conexión. Verifica tu conexión a internet y que el servidor esté disponible."
-          );
-        } else {
-          // Algo más causó el error
-          console.error("Error:", error.message);
-          toast.error(`Error: ${error.message}`);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+        console.error("Error fetching data:", error);
       });
   };
 
@@ -243,14 +158,14 @@ const Users: React.FC = () => {
   };
 
   const handleChangecrear = () => {
-    toast.success("Usuario creado con éxito");
+    toast.success("Se creó el usuario con éxito");
     setIsModalOpen(false);
     setModalContent(null);
     fetchData();
   };
 
   const handleChangeeditar = () => {
-    toast.success("Usuario editado con éxito");
+    toast.success("Se editaron los datos con éxito");
     setIsModalOpen(false);
     fetchData();
   };
@@ -261,68 +176,29 @@ const Users: React.FC = () => {
 
   const filteredData = apiData.filter(
     (item) =>
-      (item.username || "").toLowerCase().includes(searchTerm) ||
-      (item.email || "").toLowerCase().includes(searchTerm) ||
-      (item.type || "").toLowerCase().includes(searchTerm)
+      (item.name || "").toLowerCase().includes(searchTerm) ||
+      (item.description || "").toLowerCase().includes(searchTerm)
   );
 
-  // Función para ordenar los datos filtrados
-  const sortedData = [...filteredData].sort((a, b) => {
-    const { key, direction } = sortConfig;
-    let aValue = "";
-    let bValue = "";
-
-    // Obtener los valores según la clave de ordenamiento
-    switch (key) {
-      case "username":
-        aValue = a.username || "";
-        bValue = b.username || "";
-        break;
-      case "email":
-        aValue = a.email || "";
-        bValue = b.email || "";
-        break;
-      case "type":
-        aValue = a.type || "";
-        bValue = b.type || "";
-        break;
-      case "dateCreation":
-        aValue = a.dateCreation || "";
-        bValue = b.dateCreation || "";
-        break;
-      default:
-        return 0;
-    }
-
-    // Comparar valores
-    if (aValue < bValue) {
-      return direction === "asc" ? -1 : 1;
-    }
-    if (aValue > bValue) {
-      return direction === "asc" ? 1 : -1;
-    }
-    return 0;
-  });
-
-  const handleDelete = (itemId: string) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) {
-      // Aquí deberías usar la URL correcta para eliminar usuarios
-      const DELETE_URL = `https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/delete/${itemId}`;
+  const handleDelete = (itemId: number) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar este registro?")) {
+      const requestBody = {
+        API: "talentic",
+        MODEL: "talentic",
+        RESOURCE: "roles",
+        key: "5b8d3b1f084b01c6a8387459e80d4bb9",
+        TYPE: "DELETE",
+        id: itemId,
+      };
 
       axios
-        .delete(DELETE_URL, {
-          headers: {
-            session_token: token,
-            "Content-Type": "application/json",
-          },
-        })
+        .post("http://217.15.168.117:8080/api/", requestBody)
         .then(() => {
-          toast.success("Usuario eliminado con éxito");
+          toast.success("Se eliminaron los datos con éxito");
           fetchData();
         })
         .catch((error) => {
-          console.error("Error deleting user:", error);
-          toast.error("Error al eliminar el usuario");
+          console.error("Error deleting data:", error);
         });
     }
   };
@@ -334,36 +210,32 @@ const Users: React.FC = () => {
 
   const handleEditClick = (
     FormComponent: React.ElementType,
-    id: string,
-    username: string,
-    email: string,
-    type: string
+    id: number,
+    name: string,
+    description: string
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
         idDefault={id}
-        usernameDefault={username}
-        emailDefault={email}
-        typeDefault={type}
+        nameDefault={name}
+        descriptionDefault={description}
       />
     );
   };
 
   const handleShowClick = (
     FormComponent: React.ElementType,
-    username: string,
-    email: string,
-    type: string
+    name: string,
+    description: string
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        usernameDefault={username}
-        emailDefault={email}
-        typeDefault={type}
+        nameDefault={name}
+        descriptionDefault={description}
       />
     );
   };
@@ -372,11 +244,12 @@ const Users: React.FC = () => {
     const realItem = apiData.find((i) => String(i.id) === String(item.id));
 
     if (!realItem) {
-      console.warn("Usuario no encontrado para el menú:", item.id);
+      console.warn("Item no encontrado para el menú:", item.id);
       return { isActive: false, onClose: () => {}, actions: [] };
     }
 
     const isActive = String(activeMenuActions) === String(realItem.id);
+    console.log("Acciones para:", realItem.id, "| isActive:", isActive);
 
     return {
       isActive,
@@ -386,12 +259,7 @@ const Users: React.FC = () => {
           label: "Ver",
           icon: "IconVer",
           onClick: () =>
-            handleShowClick(
-              Show,
-              realItem.username,
-              realItem.email,
-              realItem.type
-            ),
+            handleShowClick(Show, realItem.name, realItem.description),
         },
         {
           label: "Editar",
@@ -400,9 +268,8 @@ const Users: React.FC = () => {
             handleEditClick(
               Update,
               realItem.id,
-              realItem.username,
-              realItem.email,
-              realItem.type
+              realItem.name,
+              realItem.description
             ),
           className: "menu_acciones_editar",
         },
@@ -450,25 +317,21 @@ const Users: React.FC = () => {
             </div>
             {viewType === "cards" ? (
               <div className="layout_cards">
-                {loading ? (
-                  <div style={{ textAlign: "center", padding: "2rem" }}>
-                    <p>Cargando usuarios...</p>
-                  </div>
-                ) : sortedData.length > 0 ? (
-                  sortedData.map((item) => (
+                {filteredData.length > 0 ? (
+                  filteredData.map((item) => (
                     <CardView
                       key={item.id}
-                      titulo={item.username}
-                      subtitulo={item.email}
-                      parrafo={item.type}
+                      titulo={item.name}
+                      subtitulo={item.description}
+                      parrafo="2024-08-26 14:01:51"
                       actionMenuProps={actionMenuProps}
                       item={item}
                       toggleMenuActions={toggleMenuActions}
-                      svg="IconUsuarios"
+                      svg="IconProyectos"
                     />
                   ))
                 ) : (
-                  <p>No se encontraron usuarios</p>
+                  <p>No se encontraron registros</p>
                 )}
               </div>
             ) : (
@@ -478,27 +341,15 @@ const Users: React.FC = () => {
                     <tr>
                       <th onClick={() => handleSort("nombreAsc")}>
                         <h4>
-                          Usuario
+                          Nombre
                           <IconSVG name="IconFlechas" />
                         </h4>
                       </th>
-                      <th onClick={() => handleSort("emailAsc")}>
-                        <h4>
-                          Email
-                          <IconSVG name="IconFlechas" />
-                        </h4>
+                      <th>
+                        <h4>Descripción</h4>
                       </th>
-                      <th onClick={() => handleSort("tipoAsc")}>
-                        <h4>
-                          Tipo
-                          <IconSVG name="IconFlechas" />
-                        </h4>
-                      </th>
-                      <th onClick={() => handleSort("fechaDesc")}>
-                        <h4>
-                          Fecha Creación
-                          <IconSVG name="IconFlechas" />
-                        </h4>
+                      <th>
+                        <h4>Fecha</h4>
                       </th>
                       <th>
                         <h4>Acciones</h4>
@@ -506,31 +357,22 @@ const Users: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {loading ? (
-                      <tr>
-                        <td
-                          colSpan={5}
-                          style={{ textAlign: "center", padding: "2rem" }}
-                        >
-                          Cargando usuarios...
-                        </td>
-                      </tr>
-                    ) : sortedData.length > 0 ? (
-                      sortedData.map((item) => (
+                    {filteredData.length > 0 ? (
+                      filteredData.map((item) => (
                         <ListView
                           key={item.id}
-                          titulo={item.username}
-                          subtitulo={item.email}
-                          parrafo={item.type}
+                          titulo={item.name}
+                          subtitulo={item.description}
+                          parrafo="2024-08-26 14:01:51"
                           actionMenuProps={actionMenuProps}
                           item={item}
                           toggleMenuActions={toggleMenuActions}
-                          svg="IconUsuarios"
+                          svg="IconProyectos"
                         />
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={5}>No se encontraron usuarios</td>
+                        <td colSpan={4}>No se encontraron registros</td>
                       </tr>
                     )}
                   </tbody>
