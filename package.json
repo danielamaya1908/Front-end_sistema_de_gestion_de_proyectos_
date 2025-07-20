@@ -5,11 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "postinstall": "if [ -f node_modules/.bin/vite ]; then chmod +x node_modules/.bin/vite; fi",
-    "build": "cd node_modules/vite/bin && node vite.js build",
+    "build": "vite build",
     "preview": "vite preview",
     "start": "vite preview --port $PORT",
-    "railway-build": "yarn install --frozen-lockfile --production=false --ignore-engines"
+    "railway-build": "yarn install --frozen-lockfile --production=false"
   },
   "dependencies": {
     "axios": "^1.10.0",
