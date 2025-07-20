@@ -29,7 +29,7 @@ const LoginForm = () => {
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white p-8 rounded shadow-md w-full max-w-md"
       >
-        <h1 className="text-2xl font-bold text-center mb-3">Login</h1>
+        <h1 className="text-2xl font-bold text-center mb-3">Gestion Proyectos</h1>
 
         <div className="relative m-4">
           <input
