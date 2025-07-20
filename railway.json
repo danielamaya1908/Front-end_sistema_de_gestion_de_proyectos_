@@ -1,7 +1,7 @@
 {
   "build": {
     "nodeVersion": "22.11.0",
-    "installCommand": "yarn install --frozen-lockfile --production=false --ignore-engines",
-    "buildCommand": "./node_modules/.bin/vite build"
+    "installCommand": "yarn install --production=false --ignore-engines",
+    "buildCommand": "yarn build"
   }
 }
