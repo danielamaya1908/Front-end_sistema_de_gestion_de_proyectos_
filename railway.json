@@ -2,6 +2,6 @@
   "build": {
     "nodeVersion": "22.11.0",
     "installCommand": "yarn install --production=false --frozen-lockfile",
-    "buildCommand": "yarn build"
+    "buildCommand": "cd /app && yarn build"
   }
 }
