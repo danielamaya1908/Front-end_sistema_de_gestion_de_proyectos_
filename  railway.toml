@@ -1,5 +1,8 @@
 [build]
 builder = "nixpacks"
 
+[build.env]
+NPM_CONFIG_UPDATE_NOTIFIER = "false"
+
 [deploy]
 startCommand = "npm start"
