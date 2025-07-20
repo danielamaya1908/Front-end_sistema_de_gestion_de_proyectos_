@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
+import type { ReactNode } from 'react';
 import './../assets/modal.css';
 
 interface ModalProps {
@@ -14,7 +15,6 @@ const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
   children,
-  widthValue, // aunque está incluida, actualmente no se aplica
   titulo,
   className = ''
 }) => {

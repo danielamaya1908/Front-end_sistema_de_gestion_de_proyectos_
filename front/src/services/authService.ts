@@ -1,5 +1,4 @@
 import axios from 'axios';
-
 const API_URL = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/auth/login';
 
 export const login = async (email: string, password: string): Promise<string> => {
@@ -26,43 +25,9 @@ export const login = async (email: string, password: string): Promise<string> =>
   }
 };
 
-export const register = async (name: string, email: string, password: string): Promise<void> => {
-  try {
-    const response = await fetch(`${API_URL}/register`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-
-    const responseText = await response.text();
-    
-    if (!response.ok) {
-      let errorData;
-      try {
-        errorData = JSON.parse(responseText);
-      } catch {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      if (errorData.errors && Array.isArray(errorData.errors)) {
-        const errorMessages = errorData.errors.map((err: any) => err.msg).join(', ');
-        throw new Error(errorMessages);
-      }
-      
-      throw new Error(errorData.message || 'Registration failed');
-    }
-
-    // Si hay respuesta exitosa, parsearla
-    if (responseText) {
-      JSON.parse(responseText);
-    }
-    
-  } catch (error) {
-    console.error('Registration error:', error);
-    throw error;
-  }
+export const register = async (email: string, password: string): Promise<void> => {
+  // Ejemplo de petición a una API
+  await axios.post('/api/register', { email, password });
 };
 
 export const forgotPassword = async (email: string): Promise<void> => {

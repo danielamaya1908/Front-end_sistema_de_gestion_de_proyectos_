@@ -17,7 +17,6 @@ const SeacrhInput: React.FC<SeacrhInputProps> = ({
   name = 'name',
   value,
   placeholder = 'nombre',
-  label = 'Nombre',
   colClassName = '',
   onChange
 }) => {

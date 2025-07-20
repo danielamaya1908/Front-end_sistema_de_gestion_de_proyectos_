@@ -41,18 +41,20 @@ const Projects: React.FC = () => {
   const navigate = useNavigate();
 
   const hashToVer = "a959cc809c209a915e2b2f55846f656f";
-  const hashToCrear = "a551d82ab410af170d98a4a8412a24b1";
   const hashToEditar = "b37268352a18884127e4ddfb850e85f6";
   const hashToEliminar = "00e28788113c95aca5c57ee24ee62ff7";
 
-  const [roleFilter, setRoleFilter] = useState<string>('Todos');
   const [activeMenuActions, setActiveMenuActions] = useState<number | null>(null);
   const menuRef: MutableRefObject<HTMLUListElement | null> = useRef(null);
   const [viewType, setViewType] = useState<'cards' | 'list'>('cards');
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'dateCreation', direction: 'desc' });
 
+  const token = localStorage.getItem('token');
+
   const showCards = () => setViewType('cards');
   const showList = () => setViewType('list');
+
+  const API_URL = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -94,41 +96,50 @@ const Projects: React.FC = () => {
   }, []);
 
   const fetchData = () => {
-    const requestBody = {
-      API: "talentic",
-      MODEL: "talentic",
-      RESOURCE: "list",
-      TYPE: "roles",
-      key: "5b8d3b1f084b01c6a8387459e80d4bb9",
-    };
+    axios.get(API_URL, {
+        headers: {
+        'session_token': token,
+        'Content-Type': 'application/json'
+        },
+        params: {
+        }
+    })
+    .then(response => {
 
-    axios.post('http://217.15.168.117:8080/api/', requestBody)
-      .then(response => {
-        const cleanedData = response.data.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          description: item.description
+        const rawData = response.data?.data;
+
+        if (!Array.isArray(rawData)) {
+        console.error('Error: La propiedad "data" no es un array:', rawData);
+        return;
+        }
+
+        const cleanedData = rawData.map((item: any) => ({
+            id: item._id,
+            name: item.name,
+            description: item.description
         }));
         setApiData(cleanedData);
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         console.error('Error fetching data:', error);
-      });
+    });
   };
+
+
 
   const closeModal = () => {
     setIsModalOpen(false);
     setModalContent(null);
   };
 
-  const handleChangecrear = (newState: any) => {
+  const handleChangecrear = () => {
     toast.success("Se gestionaron los datos con éxito");
     setIsModalOpen(false);
     setModalContent(null);
     fetchData();
   };
 
-  const handleChangeeditar = (newState: any) => {
+  const handleChangeeditar = () => {
     toast.success("Se editaron los datos con éxito");
     setIsModalOpen(false);
     fetchData();
@@ -229,7 +240,7 @@ const Projects: React.FC = () => {
       <main className='main__dashboard_content'>
         <div className='form_content'>
           <section className='dashboard_titulo'>
-            <h2>Roles</h2>
+            <h2>Proyectos</h2>
           </section>
           <div className='main__dashboard_primera_parte'>
             <div className='btn_nuevo_dashboard' onClick={() => handleCreateClick(Create)}>

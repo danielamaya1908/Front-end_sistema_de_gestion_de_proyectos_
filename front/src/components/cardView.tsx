@@ -1,4 +1,3 @@
-import React from 'react';
 import type { FC } from 'react';
 import type { ActionMenuProps } from './actionMenu'; // Importación tipo-only
 import ActionMenu from './actionMenu';

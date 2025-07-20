@@ -1,6 +1,5 @@
-import React from 'react';
 import Navbar from '../components/Navbar';
-import { Link, useNavigate, Outlet  } from 'react-router-dom';
+import { Link, Outlet  } from 'react-router-dom';
 
 const DashboardPage = () => {
 

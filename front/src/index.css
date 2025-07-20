@@ -21846,7 +21846,7 @@ template {
 }
 .form_content{
     position: absolute;
-    top: -15rem;
+    top: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
