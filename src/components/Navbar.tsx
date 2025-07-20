@@ -48,15 +48,15 @@ const Navbar: React.FC = () => {
 
             <li className="dashboard_menu_item_drop">
                 <Link
-                to="/dashboard/users"
-                className={`dashboard_menu_item_content ${
-                    activeSubMenu === 'item_proyectos' ? 'active__item_menu' : ''
-                }`}
-                onClick={() => {
-                    toggleSubMenu('item_proyectos');
-                    toggleMenu('default_item');
-                    handleMenuClick('Proyectos');
-                }}
+                    to="/dashboard/users"
+                    className={`dashboard_menu_item_content ${
+                        activeSubMenu === 'item_proyectos' ? 'active__item_menu' : ''
+                    }`}
+                    onClick={() => {
+                        toggleSubMenu('item_proyectos');
+                        toggleMenu('default_item');
+                        handleMenuClick('Usuarios');
+                    }}
                 >
                 <span>Usuarios</span>
                 </Link>
@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
                 onClick={() => {
                     toggleSubMenu('item_proyectos');
                     toggleMenu('default_item');
-                    handleMenuClick('Proyectos');
+                    handleMenuClick('Usuarios');
                 }}
                 >
                 <span>Roles</span>
@@ -87,7 +87,7 @@ const Navbar: React.FC = () => {
                 onClick={() => {
                     toggleSubMenu('item_proyectos');
                     toggleMenu('default_item');
-                    handleMenuClick('Proyectos');
+                    handleMenuClick('Tareas');
                 }}
                 >
                 <span>Tareas</span>

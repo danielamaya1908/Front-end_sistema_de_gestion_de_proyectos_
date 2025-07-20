@@ -30,7 +30,7 @@ interface SortConfig {
   direction: 'asc' | 'desc';
 }
 
-const Projects: React.FC = () => {
+const Users: React.FC = () => {
   const [apiData, setApiData] = useState<RoleItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
@@ -310,4 +310,4 @@ const Projects: React.FC = () => {
   );
 };
 
-export default Projects;
+export default Users;

@@ -3,7 +3,7 @@ import { ToastContainer } from 'react-toastify';
 
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProjectsPage from './pages/projects/Projects';
-import Userspage from './pages/users/Users';
+import UsersPage from './pages/users/Users';
 import DashboardPage from './pages/DashboardPage';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
@@ -32,7 +32,7 @@ const App = () => {
         >
           <Route index element={<Navigate to="projects" />} />
           <Route path="projects" element={<ProjectsPage />} />
-          <Route path="users" element={<Userspage />} />
+          <Route path="users" element={<UsersPage />} />
         </Route>
       </Routes>
     </>
