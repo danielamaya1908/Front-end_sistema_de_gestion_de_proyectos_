@@ -1,7 +1,7 @@
 {
   "build": {
     "nodeVersion": "22.11.0",
-    "installCommand": "yarn install --production=false --ignore-engines",
+    "installCommand": "yarn install --frozen-lockfile --production=false",
     "buildCommand": "yarn build"
   }
 }
