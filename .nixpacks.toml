@@ -1,9 +1,0 @@
-[phases.setup]
-nixpkgsArchive = "23.11"
-packages = ["nodejs_20", "yarn"]
-
-[phases.build]
-cmds = ["yarn install", "yarn build"]
-
-[phases.start]
-cmd = "yarn start"
