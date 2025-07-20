@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import IconSVG from './icon';
 
-export type IconName = 'IconX' | 'IconBusqueda' | 'IconTipoTarjetas' | 'IconTipoListas';
+export type IconName = string;
 
 export interface Action {
   label: string;

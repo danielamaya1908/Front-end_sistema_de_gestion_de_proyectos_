@@ -7,7 +7,7 @@ import BtnSubmitDashboard from '../../components/btnSubmitDashboard';
 import InputDashboard from '../../components/inputDashboard';
 import TextareaDashboard from '../../components/textareaDashboard';
 
-interface CreateRolesProps {
+interface CreateProps {
   onSubmitState: (success: boolean) => void;
 }
 
@@ -16,7 +16,7 @@ interface RoleFormData {
   description: string;
 }
 
-const CreateRoles: React.FC<CreateRolesProps> = ({ onSubmitState }) => {
+const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
   const [formData, setFormData] = useState<RoleFormData>({
     name: '',
     description: '',
@@ -93,4 +93,4 @@ const CreateRoles: React.FC<CreateRolesProps> = ({ onSubmitState }) => {
   );
 };
 
-export default CreateRoles;
+export default Create;

@@ -40,11 +40,7 @@ const Projects: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const hashToVer = "a959cc809c209a915e2b2f55846f656f";
-  const hashToEditar = "b37268352a18884127e4ddfb850e85f6";
-  const hashToEliminar = "00e28788113c95aca5c57ee24ee62ff7";
-
-  const [activeMenuActions, setActiveMenuActions] = useState<number | null>(null);
+  const [activeMenuActions, setActiveMenuActions] = useState<string | null>(null);
   const menuRef: MutableRefObject<HTMLUListElement | null> = useRef(null);
   const [viewType, setViewType] = useState<'cards' | 'list'>('cards');
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'dateCreation', direction: 'desc' });
@@ -87,8 +83,8 @@ const Projects: React.FC = () => {
   };
 
   const toggleMenuActions = (menuName: string | number) => {
-    const id = typeof menuName === 'string' ? parseInt(menuName, 10) : menuName;
-    setActiveMenuActions(activeMenuActions === id ? null : id);
+    const id = String(menuName);
+    setActiveMenuActions(prev => (prev === id ? null : id));
   };
 
   useEffect(() => {
@@ -98,8 +94,8 @@ const Projects: React.FC = () => {
   const fetchData = () => {
     axios.get(API_URL, {
         headers: {
-        'session_token': token,
-        'Content-Type': 'application/json'
+            'session_token': token,
+            'Content-Type': 'application/json'
         },
         params: {
         }
@@ -198,41 +194,47 @@ const Projects: React.FC = () => {
     setModalContent(<FormComponent onUPSubmitState={handleChangeeditar} nameDefault={name} descriptionDefault={description} />);
   };
 
-  const formDatauser = { permisos: [hashToVer, hashToEditar, hashToEliminar] }; // Debe venir de contexto o props
-
   const actionMenuProps = (item: { id: string | number }) => {
-    const realItem = apiData.find(i => i.id === item.id);
-    if (!realItem) return { isActive: false, onClose: () => {}, actions: [] };
+    const realItem = apiData.find(i => String(i.id) === String(item.id));
+
+    if (!realItem) {
+        console.warn('Item no encontrado para el menú:', item.id);
+        return { isActive: false, onClose: () => {}, actions: [] };
+    }
+
+    const isActive = String(activeMenuActions) === String(realItem.id);
+    console.log('Acciones para:', realItem.id, '| isActive:', isActive);
 
     return {
-        isActive: activeMenuActions === realItem.id,
+        isActive,
         onClose: () => setActiveMenuActions(null),
         actions: [
-        formDatauser.permisos.includes(hashToVer) && {
+        {
             label: 'Permisos',
-            icon: 'Icon_permisos_talentic',
+            icon: 'IconPermisos',
             onClick: () => navigate('/dashboard/allocationrigths', { state: { id: realItem.id } }),
         },
-        formDatauser.permisos.includes(hashToVer) && {
+        {
             label: 'Ver',
-            icon: 'Icon_ver_talentic_2',
+            icon: 'IconVer',
             onClick: () => handleShowClick(Show, realItem.name, realItem.description),
         },
-        formDatauser.permisos.includes(hashToEditar) && {
+        {
             label: 'Editar',
-            icon: 'Icon_editar_talentic_2',
+            icon: 'IconEditar',
             onClick: () => handleEditClick(Update, realItem.id, realItem.name, realItem.description),
             className: 'menu_acciones_editar'
         },
-        formDatauser.permisos.includes(hashToEliminar) && {
+        {
             label: 'Eliminar',
-            icon: 'Icon_eliminar_talentic_2',
+            icon: 'IconEliminar',
             onClick: () => handleDelete(realItem.id),
             className: 'menu_acciones_eliminar'
         }
-        ].filter(Boolean) as any[]
+        ]
     };
   };
+
 
 
   return (
@@ -269,7 +271,7 @@ const Projects: React.FC = () => {
                       actionMenuProps={actionMenuProps}
                       item={item}
                       toggleMenuActions={toggleMenuActions}
-                      svg="Icon_roles_talentic"
+                      svg="IconProyectos"
                     />
                   ))
                 ) : (
@@ -281,7 +283,7 @@ const Projects: React.FC = () => {
                 <table>
                   <thead>
                     <tr>
-                      <th onClick={() => handleSort('nombreAsc')}><h4>Roles<IconSVG name="Icon_flechas_talentic" /></h4></th>
+                      <th onClick={() => handleSort('nombreAsc')}><h4>Nombre<IconSVG name="IconFlechas" /></h4></th>
                       <th><h4>Descripción</h4></th>
                       <th><h4>Fecha</h4></th>
                       <th><h4>Acciones</h4></th>
@@ -297,7 +299,7 @@ const Projects: React.FC = () => {
                         actionMenuProps={actionMenuProps}
                         item={item}
                         toggleMenuActions={toggleMenuActions}
-                        svg="Icon_roles_talentic"
+                        svg="IconProyectos"
                       />
                     )) : (
                       <tr><td colSpan={4}>No se encontraron registros</td></tr>

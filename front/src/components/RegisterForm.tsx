@@ -1,6 +1,8 @@
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { register as registerUser } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+
+import { register as registerUser } from '../services/authService';
+
 import type { FC } from 'react';
 
 type RegisterData = {

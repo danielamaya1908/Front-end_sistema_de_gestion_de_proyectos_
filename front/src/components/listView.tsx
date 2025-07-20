@@ -56,7 +56,7 @@ const ListView: FC<ListViewProps> = ({
           className="icon_list_action"
           onClick={() => toggleMenuActions(item.id)}
         >
-          <IconSVG name="IconX" /> {/* Cambiar por el ícono correcto si es diferente */}
+          <IconSVG name="IconX" />
         </div>
         <ActionMenu {...actionMenuProps(item)} />
       </div>

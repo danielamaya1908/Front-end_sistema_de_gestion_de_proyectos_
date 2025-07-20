@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
 import type { FC } from 'react';
+
 import IconSVG from '../../components/icon';
 
-interface ShowRolesProps {
+interface ShowProps {
   nameDefault: string;
   descriptionDefault: string;
 }
 
-const ShowRoles: FC<ShowRolesProps> = ({ nameDefault, descriptionDefault }) => {
+const Show: FC<ShowProps> = ({ nameDefault, descriptionDefault }) => {
   const [formData, setFormData] = useState({
     name: nameDefault,
     description: descriptionDefault
@@ -58,4 +59,4 @@ const ShowRoles: FC<ShowRolesProps> = ({ nameDefault, descriptionDefault }) => {
   );
 };
 
-export default ShowRoles;
+export default Show;

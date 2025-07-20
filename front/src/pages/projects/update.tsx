@@ -7,7 +7,7 @@ import BtnSubmitDashboard from '../../components/btnSubmitDashboard';
 import InputDashboard from '../../components/inputDashboard';
 import TextareaDashboard from '../../components/textareaDashboard';
 
-interface UpdateRolesProps {
+interface UpdateProps {
   onUPSubmitState: (success: boolean) => void;
   idDefault: number;
   nameDefault: string;
@@ -20,7 +20,7 @@ interface FormData {
   description: string;
 }
 
-const UpdateRoles: React.FC<UpdateRolesProps> = ({
+const Update: React.FC<UpdateProps> = ({
   onUPSubmitState,
   idDefault,
   nameDefault,
@@ -100,4 +100,4 @@ const UpdateRoles: React.FC<UpdateRolesProps> = ({
   );
 };
 
-export default UpdateRoles;
+export default Update;
