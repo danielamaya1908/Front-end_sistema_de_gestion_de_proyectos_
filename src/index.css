@@ -21366,7 +21366,7 @@ template {
 }
 /*Menu*/
 .dashboard_menu_main{
-    background: #fff;
+    background: #0f0f0f6b;
     padding: 1em;
     border-radius: 1em;
 }
@@ -21396,8 +21396,9 @@ template {
 }
 
 .dashboard_menu_logo{
-    width: 120px;
-    margin-bottom: 1em;
+    width: 240px;
+    margin-bottom: 3em;
+    margin-top: 2em;
 }
 .dashboard_menu_logo a{
     width: 100%;
@@ -21495,14 +21496,14 @@ template {
     transform:translateY(-50%) rotate(180deg);
 }
 .active__item_menu{
-    background-color:rgba(94, 179, 25, 0.16);
+    background-color:#0097cd;
     color: #550010 !important;
 }
 .active__item_menu svg{
     fill: #550010 !important;
 }
 .active__item_menu:hover{
-    background-color:rgba(94, 179, 25, 0.16) !important;
+    background-color:#0097cd !important;
     color: #550010 !important;
 }
 .dashboard_submenu_items{
@@ -21533,7 +21534,7 @@ template {
     border-radius: .5em;
 }
 .dashboard_cerrar_sesion:hover{
-    background-color: rgba(94, 179, 25, 0.16);
+    background-color: #0097cd;
     border: 1px solid #550010 ;
 }
 .dashboard_cerrar_sesion:hover a{

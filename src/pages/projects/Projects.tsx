@@ -18,7 +18,7 @@ import SortFilter from '../../components/sortFilter';
 import ListView from '../../components/listView';
 import CardView from '../../components/cardView';
 
-interface RoleItem {
+interface ProyectItem {
   id: number;
   name: string;
   description: string;
@@ -31,7 +31,7 @@ interface SortConfig {
 }
 
 const Projects: React.FC = () => {
-  const [apiData, setApiData] = useState<RoleItem[]>([]);
+  const [apiData, setApiData] = useState<ProyectItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -303,7 +303,7 @@ const Projects: React.FC = () => {
           </div>
         </div>
       </main>
-      <Modal isOpen={isModalOpen} onClose={closeModal} titulo={"Rol"}>
+      <Modal isOpen={isModalOpen} onClose={closeModal} titulo={"Proyectos"}>
         {modalContent}
       </Modal>
     </div>
