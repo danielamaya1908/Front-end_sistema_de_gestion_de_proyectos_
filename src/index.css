@@ -8327,13 +8327,13 @@ html::-webkit-scrollbar:horizontal,
 html::-webkit-scrollbar-thumb,
 ::-webkit-scrollbar-thumb {
 
-    background-color: var(--fondo-container);
+    background-color: #1c2e53;
     border-radius: 20px;
 }
 .dexcom-table-container::-webkit-scrollbar-track,
 html::-webkit-scrollbar-track {
 
-    background-color: #566a7f;
+    background-color: #1c2e53;
     border-top-right-radius: 3px 3px;
     border-bottom-right-radius: 3px 3px;
 }
@@ -21801,7 +21801,7 @@ template {
     }
     .main__dashboard_menu_interno::-webkit-scrollbar-thumb{
         border-radius: 10px;
-        background-color: #ffffff !important;
+        background-color: #1c2e53 !important;
         height: 3px;
     }
     .main__dashboard_menu_interno ul li{
@@ -22024,7 +22024,7 @@ template {
 .layout_cards table::-webkit-scrollbar-thumb,
 .modal_info_user_item p::-webkit-scrollbar-thumb{
     border-radius: 10px;
-    background-color: #5eb319 !important;
+    background-color: #1c2e53 !important;
     height: 8px;
 }
 .layout_list_dashboard {
@@ -22233,7 +22233,7 @@ li.menu_acciones_aprobar:hover span{
     padding: 1em 0;
     cursor: pointer;
     text-align: center;
-    font-weight: 900;
+    font-weight: 400;
     justify-content: center;
 }
 
@@ -23362,7 +23362,7 @@ body {
   font-size: 0.8rem;
   font-weight: var(--bs-body-font-weight);
   line-height: 1.2rem;
-  color: #1a1c1f;
+  color: #042141;
   text-align: var(--bs-body-text-align);
   background-color: #eaeaea;
   -webkit-text-size-adjust: 100%;
