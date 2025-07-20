@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
 
             <li className="dashboard_menu_item_drop">
                 <Link
-                to="/dashboard/projects"
+                to="/dashboard/users"
                 className={`dashboard_menu_item_content ${
                     activeSubMenu === 'item_proyectos' ? 'active__item_menu' : ''
                 }`}

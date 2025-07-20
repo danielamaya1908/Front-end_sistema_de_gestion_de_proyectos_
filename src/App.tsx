@@ -3,9 +3,9 @@ import { ToastContainer } from 'react-toastify';
 
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ProjectsPage from './pages/projects/Projects';
+import Userspage from './pages/users/Users';
 import DashboardPage from './pages/DashboardPage';
 import RegisterPage from './pages/RegisterPage';
-import SettingsPage from './pages/SettingsPage';
 import LoginPage from './pages/LoginPage';
 
 import PrivateRoute from './components/PrivateRoute';
@@ -32,7 +32,7 @@ const App = () => {
         >
           <Route index element={<Navigate to="projects" />} />
           <Route path="projects" element={<ProjectsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="users" element={<Userspage />} />
         </Route>
       </Routes>
     </>
