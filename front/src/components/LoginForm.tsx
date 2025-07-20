@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { login } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type LoginData = {
   email: string;
@@ -16,20 +17,49 @@ const LoginForm = () => {
     try {
       const token = await login(data.email, data.password);
       localStorage.setItem('token', token);
-      alert('Login exitoso');
-      // redirigir a dashboard
-    } catch {
-      alert('Credenciales inválidas');
+      toast.success('Login exitoso');
+      navigate('/dashboard');
+    } catch (error: any) {
+      toast.error(error.message || 'Credenciales inválidas');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="form">
-      <h2>Iniciar Sesión</h2>
-      <input type="email" placeholder="Email" {...register('email')} required />
-      <input type="password" placeholder="Contraseña" {...register('password')} required />
-      <button type="submit">Entrar</button>
-    </form>
+    <section className="min-h-screen flex items-center justify-center bg-gray-100">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-8 rounded shadow-md w-full max-w-md"
+      >
+        <h1 className="text-2xl font-bold text-center mb-3">Login</h1>
+
+        <div className="relative m-4">
+          <input
+            type="email"
+            {...register('email')}
+            required
+            placeholder="Email"
+            className="pl-3 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+          />
+        </div>
+
+        <div className="relative m-4">
+          <input
+            type="password"
+            {...register('password')}
+            required
+            placeholder="Contraseña"
+            className="pl-3 w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400"
+          />
+        </div>
+
+        <button
+          type="submit"
+          className="btn btn-outline-primary btn-outline-info btn_interaction m-1"
+        >
+          Entrar
+        </button>
+      </form>
+    </section>
   );
 };
 

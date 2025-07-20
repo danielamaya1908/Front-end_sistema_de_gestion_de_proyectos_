@@ -1,0 +1,129 @@
+const API_URL = 'https://kw358s80-5000.use.devtunnels.ms/api/auth';
+
+export const login = async (email: string, password: string): Promise<string> => {
+  console.log('🚀 === INICIO LOGIN FRONTEND ===');
+  console.log('📧 Email:', email);
+  console.log('🔐 Password:', password ? `${password.length} caracteres` : 'NO PROPORCIONADO');
+  console.log('🌐 URL destino:', `${API_URL}/login`);
+  
+  const requestData = { email, password };
+  console.log('📤 Datos a enviar:', requestData);
+  
+  try {
+    console.log('🌍 Realizando petición fetch...');
+    
+    const response = await fetch(`${API_URL}/login`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(requestData),
+    });
+    
+    console.log('📡 Response recibida:');
+    console.log('   - Status:', response.status);
+    console.log('   - StatusText:', response.statusText);
+    console.log('   - OK:', response.ok);
+    console.log('   - Headers:', Object.fromEntries(response.headers.entries()));
+    
+    if (!response.ok) {
+      console.log('❌ Response no OK, obteniendo error...');
+      
+      try {
+        const errorData = await response.json();
+        console.error('❌ Error del servidor:', errorData);
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+      } catch (parseError) {
+        console.error('❌ Error al parsear respuesta de error:', parseError);
+        const textError = await response.text();
+        console.error('❌ Respuesta como texto:', textError);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    }
+    
+    console.log('✅ Response OK, parseando JSON...');
+    const data = await response.json();
+    console.log('📥 Datos recibidos del servidor:', data);
+    
+    if (!data.token) {
+      console.error('❌ No se recibió token en la respuesta');
+      throw new Error('Token no recibido del servidor');
+    }
+    
+    console.log('🎉 Login exitoso - Token recibido:', data.token.substring(0, 20) + '...');
+    return data.token;
+    
+  } catch (error) {
+    console.error('💥 Error en login frontend:');
+    console.error('   - Mensaje:', error.message);
+    console.error('   - Tipo:', error.constructor.name);
+    console.error('   - Stack:', error.stack);
+    throw error;
+  } finally {
+    console.log('🏁 === FIN LOGIN FRONTEND ===\n');
+  }
+};
+
+export const register = async (email: string, password: string): Promise<void> => {
+  console.log('🚀 === INICIO REGISTER FRONTEND ===');
+  console.log('📧 Email:', email);
+  console.log('🔐 Password:', password ? `${password.length} caracteres` : 'NO PROPORCIONADO');
+  
+  try {
+    const response = await fetch(`${API_URL}/register`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ email, password }),
+    });
+    
+    console.log('📡 Register response:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Error en register:', errorData);
+      throw new Error(errorData.message || 'Registration failed');
+    }
+    
+    console.log('✅ Register exitoso');
+  } catch (error) {
+    console.error('💥 Error en register frontend:', error.message);
+    throw error;
+  } finally {
+    console.log('🏁 === FIN REGISTER FRONTEND ===\n');
+  }
+};
+
+export const forgotPassword = async (email: string): Promise<void> => {
+  console.log('🚀 === INICIO FORGOT PASSWORD FRONTEND ===');
+  console.log('📧 Email:', email);
+  
+  try {
+    const response = await fetch(`${API_URL}/forgot-password`, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ email }),
+    });
+    
+    console.log('📡 Forgot password response:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('❌ Error en forgot password:', errorData);
+      throw new Error(errorData.message || 'Failed to send recovery email');
+    }
+    
+    console.log('✅ Forgot password exitoso');
+  } catch (error) {
+    console.error('💥 Error en forgot password frontend:', error.message);
+    throw error;
+  } finally {
+    console.log('🏁 === FIN FORGOT PASSWORD FRONTEND ===\n');
+  }
+};

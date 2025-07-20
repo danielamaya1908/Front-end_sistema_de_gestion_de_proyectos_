@@ -1,0 +1,79 @@
+import React, { useState } from 'react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+
+import BtnSubmitDashboard from '../../components/btnSubmitDashboard';
+import InputDashboard from '../../components/inputDashboard';
+import TextareaDashboard from '../../components/textareaDashboard';
+
+const CreateRoles = ({ onSubmitState }) => {
+    const [formData, setFormData] = useState({
+        name: '',
+        description: '',
+    });
+    const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
+
+    const handleCreate = async (e) => {
+        e.preventDefault();
+        const { name, description } = formData;
+
+        const requestBody = {
+            "API": "talentic",
+            "MODEL": "talentic",
+            "RESOURCE": "roles",
+            "key": "5b8d3b1f084b01c6a8387459e80d4bb9",
+            "TYPE": "PUT",
+            "name": name,
+            "description": description
+        };
+
+        try {
+            await axios.post('http://217.15.168.117:8080/api/', requestBody);
+            setFormData({ name: '', description: '' });
+            onSubmitState(true);
+        } catch (error) {
+            console.error('Error creating data:', error);
+            toast.error('Hubo un error al crear. Por favor, inténtelo de nuevo.');
+        }
+    };
+
+    return (
+        <div className="modal_user_content">
+            
+            <form className='modal_form' method="POST" onSubmit={handleCreate}>
+                
+                <div className='modal_form_item'>
+                    <InputDashboard 
+                        name="name" 
+                        label="Nombre"
+                        placeholder="nombre" 
+                        value={formData.name}
+                        onChange={handleChange}
+                        colClassName=""
+                    />
+                </div>
+                <div className='modal_form_item'>
+                    <TextareaDashboard
+                        name="description" 
+                        label="Descripción"
+                        placeholder="descripción" 
+                        value={formData.description}
+                        onChange={handleChange}
+                        colClassName=""
+                    />
+                </div>
+                <BtnSubmitDashboard text="Guardar"/>
+            </form>
+        </div>
+    );
+};
+
+export default CreateRoles;
