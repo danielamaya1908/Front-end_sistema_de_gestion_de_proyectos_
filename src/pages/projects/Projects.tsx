@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import type { MutableRefObject, JSX } from 'react';
-import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -37,8 +36,6 @@ const Projects: React.FC = () => {
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element | null>(null);
-
-  const navigate = useNavigate();
 
   const [activeMenuActions, setActiveMenuActions] = useState<string | null>(null);
   const menuRef: MutableRefObject<HTMLUListElement | null> = useRef(null);
@@ -209,11 +206,6 @@ const Projects: React.FC = () => {
         isActive,
         onClose: () => setActiveMenuActions(null),
         actions: [
-        {
-            label: 'Permisos',
-            icon: 'IconPermisos',
-            onClick: () => navigate('/dashboard/allocationrigths', { state: { id: realItem.id } }),
-        },
         {
             label: 'Ver',
             icon: 'IconVer',
