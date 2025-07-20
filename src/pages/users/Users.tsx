@@ -18,7 +18,7 @@ import SortFilter from "../../components/sortFilter";
 import ListView from "../../components/listView";
 import CardView from "../../components/cardView";
 
-interface RoleItem {
+interface UserItem {
   id: number;
   name: string;
   description: string;
@@ -31,7 +31,7 @@ interface SortConfig {
 }
 
 const Users: React.FC = () => {
-  const [apiData, setApiData] = useState<RoleItem[]>([]);
+  const [apiData, setApiData] = useState<UserItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -52,8 +52,7 @@ const Users: React.FC = () => {
   const showCards = () => setViewType("cards");
   const showList = () => setViewType("list");
 
-  const API_URL =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll";
+  const API_URL = "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -130,10 +129,15 @@ const Users: React.FC = () => {
           session_token: token,
           "Content-Type": "application/json",
         },
-        params: {},
+        params: {
+          page: 1
+        },
       })
       .then((response) => {
-        const rawData = response.data?.data;
+
+        console.log(response.data);
+
+        const rawData = response.data?.users;
 
         if (!Array.isArray(rawData)) {
           console.error('Error: La propiedad "data" no es un array:', rawData);
@@ -143,7 +147,7 @@ const Users: React.FC = () => {
         const cleanedData = rawData.map((item: any) => ({
           id: item._id,
           name: item.name,
-          description: item.description,
+          description: item.email,
         }));
         setApiData(cleanedData);
       })
@@ -346,7 +350,7 @@ const Users: React.FC = () => {
                         </h4>
                       </th>
                       <th>
-                        <h4>Descripción</h4>
+                        <h4>Correo</h4>
                       </th>
                       <th>
                         <h4>Fecha</h4>

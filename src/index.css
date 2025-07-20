@@ -22212,7 +22212,7 @@ li.menu_acciones_aprobar:hover span{
     border-bottom: 1px solid #000000;
 }
 .layout_list_dashboard table thead tr{
-    position: sticky;
+    position: initial;
     top: 0;
     background-color: #ffffff00;
     z-index: 1;
