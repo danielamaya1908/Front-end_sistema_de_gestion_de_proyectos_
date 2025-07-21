@@ -98,8 +98,8 @@ const Create: React.FC<CreateProps> = ({ onSubmitState, id_default }) => {
     setIsSubmitting(true);
 
     try {
-      console.log("Enviando datos:", formData);
-      console.log("Token:", token);
+      console.log("📤 Enviando datos:", formData);
+      console.log("🔑 Token:", token);
 
       const response = await axios.post(
         "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/create",
@@ -116,12 +116,12 @@ const Create: React.FC<CreateProps> = ({ onSubmitState, id_default }) => {
         {
           headers: {
             "Content-Type": "application/json",
-            session_token: token, // Usando exactamente el header que necesitas
+            session_token: token,
           },
         }
       );
 
-      console.log("Respuesta del servidor:", response.data);
+      console.log("✅ Respuesta del servidor:", response.data);
 
       setFormData({
         title: "",
@@ -137,12 +137,13 @@ const Create: React.FC<CreateProps> = ({ onSubmitState, id_default }) => {
       onSubmitState(true);
       toast.success("Tarea creada exitosamente");
     } catch (error) {
-      console.error("Error al crear tarea:", error);
+      console.error("❌ Error al crear tarea:", error);
 
       if (axios.isAxiosError(error)) {
         if (error.response?.status === 401) {
           toast.error("Sesión expirada. Por favor inicie sesión nuevamente.");
         } else {
+          console.error("Error response:", error.response?.data);
           toast.error(
             error.response?.data?.message || "Error al crear la tarea"
           );
