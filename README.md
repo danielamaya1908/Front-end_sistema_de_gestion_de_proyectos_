@@ -1,69 +1,110 @@
-# React + TypeScript + Vite
+🗂️ Frontend - Sistema de Gestión de Proyectos
+Aplicación web moderna construida con React, TypeScript, Vite y TailwindCSS
+🔗 Demo en Producción
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+<div align="center"> <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB"/> <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white"/> <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white"/> <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white"/> </div>
+🎯 Descripción del Proyecto
+Este frontend forma parte de un sistema de gestión de proyectos que permite a Administradores, Managers y Desarrolladores visualizar, crear y actualizar proyectos y tareas según su rol. Implementa autenticación, control de rutas protegidas y una interfaz moderna y responsive.
 
-Currently, two official plugins are available:
+🧪 Credenciales de Prueba
+Rol Email Contraseña
+Admin admin@test.com admin123
+Manager manager@test.com manager123
+Developer dev@test.com dev123
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+🚀 Instalación Rápida
+bash
+Copiar
+Editar
 
-## Expanding the ESLint configuration
+# 1. Clona el repositorio
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+git clone https://github.com/danielamaya1908/Front-end_sistema_de_gestion_de_proyectos_.git
+cd Front-end*sistema_de_gestion_de_proyectos*
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 2. Instala dependencias
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+npm install # o yarn
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+# 3. Inicia el servidor de desarrollo
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+npm run dev
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# 4. Abre en tu navegador
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+http://localhost:5173
+📜 Scripts Disponibles
+Comando Descripción
+npm run dev Inicia el servidor de desarrollo local
+npm run build Compila la app para producción
+npm run preview Visualiza el build de producción localmente
+npm run lint Ejecuta ESLint para validar el código fuente
+
+🏗️ Estructura del Proyecto
+bash
+Copiar
+Editar
+src/
+├── assets/ # Recursos estáticos (CSS, imágenes)
+│ ├── modal.css
+│ └── react.svg
+│
+├── components/ # Componentes reutilizables
+│ ├── btnSubmitDashboard.tsx
+│ ├── cardView.tsx
+│ └── PrivateRoute.tsx
+│
+├── pages/ # Páginas y vistas del sistema
+│ ├── projects/
+│ │ ├── create.tsx
+│ │ └── update.tsx
+│ ├── task/
+│ │ ├── Task.tsx
+│ │ └── update.tsx
+│ └── auth/
+│ ├── LoginPage.tsx
+│ └── RegisterPage.tsx
+│
+├── services/ # Servicios de conexión a APIs
+│ └── authService.ts
+│
+├── App.tsx # Componente principal
+├── main.tsx # Punto de entrada de la app
+└── routes.tsx # Configuración de rutas
+🧩 Tecnologías Utilizadas
+⚛️ React 18 – Componentes funcionales + Hooks
+
+⚡ Vite – Desarrollo ultrarrápido
+
+🔷 TypeScript – Tipado estático y mantenimiento robusto
+
+🎨 TailwindCSS – Estilos con enfoque utility-first
+
+🔐 React Router DOM – Rutas públicas y protegidas
+
+🔒 Autenticación
+La app cuenta con un sistema de login basado en roles. Cada usuario tiene acceso a distintas funcionalidades según su rol (admin, manager o developer).
+
+⚠️ Las URL del backend están incluidas directamente en los servicios, por lo que no se requiere archivo .env.
+
+🌄 Capturas de Pantalla
+Login Dashboard
+<img src="public/images/login-screenshot.png" width="300"> <img src="public/images/dashboard-screenshot.png" width="300">
+
+🛰️ Despliegue
+Este frontend está listo para ser desplegado en plataformas como Railway, Vercel o Netlify. El archivo railway.toml ya está configurado para producción en Railway.
+
+🧰 Personalización
+Puedes modificar estilos personalizados en src/assets/modal.css
+
+También puedes extender utilidades desde tailwind.config.js
+
+Para agregar nuevas rutas o vistas, edita routes.tsx y la carpeta pages/
+
+❓ Soporte
+¿Tienes dudas, sugerencias o errores que reportar?
+
+📧 Contacto: danijcdm.com@gmail.com
+🐙 GitHub: @danielamaya1908
+
+<div align="center"> <sub>✨ Desarrollado con pasión por <strong>Daniel Amaya</strong> — 2025</sub> </div>
