@@ -22,7 +22,12 @@ interface ProyectItem {
   id: number;
   name: string;
   description: string;
-  state?: string;
+  status: string;
+  priority: string;
+  startDate: string;
+  endDate: string;
+  managerId: string;
+  developers: string[];
 }
 
 interface SortConfig {
@@ -109,7 +114,13 @@ const Projects: React.FC = () => {
         const cleanedData = rawData.map((item: any) => ({
             id: item._id,
             name: item.name,
-            description: item.description
+            description: item.description,
+            status: item.status,
+            priority: item.priority,
+            startDate: item.startDate,
+            endDate: item.endDate,
+            managerId: item.managerId,
+            developers: item.developersIds
         }));
         setApiData(cleanedData);
     })
@@ -174,7 +185,7 @@ const Projects: React.FC = () => {
     setModalContent(<FormComponent onSubmitState={handleChangecrear} />);
   };
 
-  const handleEditClick = (FormComponent: React.ElementType, id: number, name: string, description: string) => {
+  const handleEditClick = (FormComponent: React.ElementType, id: number, name: string, description: string, status: string, priority: string, startDate: string, endDate: string, managerId: string, developers: string[]) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
@@ -182,13 +193,19 @@ const Projects: React.FC = () => {
         idDefault={id}
         nameDefault={name}
         descriptionDefault={description}
+        statusDefault={status}
+        priorityDefault={priority}
+        startDateDefault={startDate}
+        endDateDefault={endDate}
+        managerIdDefault={managerId}
+        developersDefault={developers}
       />
     );
   };
 
-  const handleShowClick = (FormComponent: React.ElementType, name: string, description: string) => {
+  const handleShowClick = (FormComponent: React.ElementType, name: string, description: string, status: string, priority: string, startDate: string, endDate: string, managerId: string, developers: string[]) => {
     setIsModalOpen(true);
-    setModalContent(<FormComponent onUPSubmitState={handleChangeeditar} nameDefault={name} descriptionDefault={description} />);
+    setModalContent(<FormComponent onUPSubmitState={handleChangeeditar} nameDefault={name} descriptionDefault={description} statusDefault={status} priorityDefault={priority} startDateDefault={startDate} endDateDefault={endDate} managerIdDefault={managerId} developersDefault={developers} />);
   };
 
   const actionMenuProps = (item: { id: string | number }) => {
@@ -209,12 +226,12 @@ const Projects: React.FC = () => {
         {
             label: 'Ver',
             icon: 'IconVer',
-            onClick: () => handleShowClick(Show, realItem.name, realItem.description),
+            onClick: () => handleShowClick(Show, realItem.name, realItem.description, realItem.status, realItem.priority, realItem.startDate, realItem.endDate, realItem.managerId, realItem.developers),
         },
         {
             label: 'Editar',
             icon: 'IconEditar',
-            onClick: () => handleEditClick(Update, realItem.id, realItem.name, realItem.description),
+            onClick: () => handleEditClick(Update, realItem.id, realItem.name, realItem.description, realItem.status, realItem.priority, realItem.startDate, realItem.endDate, realItem.managerId, realItem.developers),
             className: 'menu_acciones_editar'
         },
         {

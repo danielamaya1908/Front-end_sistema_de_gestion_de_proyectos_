@@ -21496,8 +21496,8 @@ template {
     transform:translateY(-50%) rotate(180deg);
 }
 .active__item_menu{
-    background-color:#0097cd;
-    color: #550010 !important;
+    background-color: #0097cd3d;
+    color: #0097cd !important;
 }
 .active__item_menu svg{
     fill: #550010 !important;

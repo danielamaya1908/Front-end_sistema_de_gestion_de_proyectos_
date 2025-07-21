@@ -50,10 +50,10 @@ const Navbar: React.FC = () => {
           <Link
             to="/dashboard/users"
             className={`dashboard_menu_item_content ${
-              activeSubMenu === "item_proyectos" ? "active__item_menu" : ""
+              activeSubMenu === "item_users" ? "active__item_menu" : ""
             }`}
             onClick={() => {
-              toggleSubMenu("item_proyectos");
+              toggleSubMenu("item_users");
               toggleMenu("default_item");
               handleMenuClick("Usuarios");
             }}
@@ -66,10 +66,10 @@ const Navbar: React.FC = () => {
           <Link
             to="/dashboard/task"
             className={`dashboard_menu_item_content ${
-              activeSubMenu === "item_proyectos" ? "active__item_menu" : ""
+              activeSubMenu === "item_tasks" ? "active__item_menu" : ""
             }`}
             onClick={() => {
-              toggleSubMenu("item_proyectos");
+              toggleSubMenu("item_tasks");
               toggleMenu("default_item");
               handleMenuClick("Tareas");
             }}
