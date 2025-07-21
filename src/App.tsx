@@ -8,6 +8,7 @@ import TaskPage from "./pages/task/Task";
 import DashboardPage from "./pages/DashboardPage";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
+import UserView from "./components/userView"; // ✅ Nuevo
 
 import PrivateRoute from "./components/PrivateRoute";
 
@@ -26,6 +27,17 @@ const App = () => {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+
+        {/* ✅ Nueva ruta para perfil */}
+        <Route
+          path="/perfil"
+          element={
+            <PrivateRoute>
+              <UserView />
+            </PrivateRoute>
+          }
+        />
+
         <Route
           path="/dashboard/*"
           element={

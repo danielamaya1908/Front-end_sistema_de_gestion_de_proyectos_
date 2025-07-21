@@ -13,9 +13,10 @@ export const login = async (email: string, password: string): Promise<string> =>
         }
       }
     );
+    
+    localStorage.setItem('token', response.data.token);
 
-    console.log(response);
-
+    
     return response.data.token;
   } catch (error: any) {
     if (error.response?.data?.message) {
