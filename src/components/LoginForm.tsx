@@ -2,6 +2,7 @@ import { useForm } from 'react-hook-form';
 import { login } from '../services/authService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import axios from 'axios';
 
 type LoginData = {
   email: string;
@@ -10,14 +11,33 @@ type LoginData = {
 
 const LoginForm = () => {
   const { register, handleSubmit } = useForm<LoginData>();
+  
+  const API_URL_PROFILE = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/auth/profile';
+
   const navigate = useNavigate();
 
   const onSubmit = async (data: LoginData) => {
     try {
       const token = await login(data.email, data.password);
-      localStorage.setItem('token', token);
-      toast.success('Login exitoso');
-      navigate('/dashboard');
+
+      axios
+      .get(API_URL_PROFILE, {
+        headers: {
+          session_token: token,
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => {
+
+        const data = response.data;
+        localStorage.setItem('user', data?.profile || data?.user || data);
+        toast.success('Login exitoso');
+        navigate('/dashboard');
+      })
+      .catch((error) => {
+        console.error("❌ Error fetching profile:", error);
+      });
+
     } catch (error: any) {
       toast.error(error.message || 'Credenciales inválidas');
     }

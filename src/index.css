@@ -21662,7 +21662,7 @@ template {
     padding-left: 5%;
 }
 .dashboard_titulo h2{
-    color: #000030 !important;
+    color: #282828 !important;
 }
 .active_item_dash{
     background-color: #ffffff;
@@ -21881,7 +21881,7 @@ template {
     justify-content: space-between;
     align-items: center;
     width: 90%;
-    border-bottom: 1px solid #000030;
+    border-bottom: 1px solid #282828;
     margin-bottom: 1em;
 }
 .main__dashboard_menu_interno ul{
