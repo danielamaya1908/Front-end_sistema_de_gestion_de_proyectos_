@@ -90,7 +90,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center bg-light px-3">
+    <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center px-3">
       <div className="col-12 col-md-8 col-lg-6 col-xl-5">
         <div className="card shadow border-0 rounded-4 overflow-hidden">
           <div
