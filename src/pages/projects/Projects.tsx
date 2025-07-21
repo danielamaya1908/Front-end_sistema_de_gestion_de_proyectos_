@@ -121,6 +121,10 @@ const Projects: React.FC = () => {
     direction: "desc",
   });
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+
   const token = localStorage.getItem("token");
 
   const showCards = () => setViewType("cards");
@@ -206,7 +210,10 @@ const Projects: React.FC = () => {
           session_token: token,
           "Content-Type": "application/json",
         },
-        params: {},
+        params: {
+          page: currentPage,
+          limit: itemsPerPage,
+        },
       })
       .then((response) => {
         const rawData = response.data?.data;
@@ -531,6 +538,21 @@ const Projects: React.FC = () => {
                 </table>
               </div>
             )}
+          </div>
+          <div className="pagination_controls">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+            >
+              Anterior
+            </button>
+            <span>Página {currentPage} de {totalPages}</span>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages}
+            >
+              Siguiente
+            </button>
           </div>
         </div>
       </main>

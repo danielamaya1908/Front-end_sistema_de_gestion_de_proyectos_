@@ -21479,6 +21479,19 @@ template {
     margin: 0 .5em;
 }
 
+.pagination_controls{
+    display: flex;
+    align-self: self-end;
+    margin-right: 3rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+ .pagination_controls button{
+    border-radius: 15px;
+    margin: 0px 15px;
+ }
+
 .arrow_submenu{
     width: 20px;
     height: 20px;

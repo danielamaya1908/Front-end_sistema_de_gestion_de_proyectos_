@@ -539,7 +539,7 @@ const Users: React.FC = () => {
                       actionMenuProps={actionMenuProps}
                       item={item}
                       toggleMenuActions={toggleMenuActions}
-                      svg="IconProyectos"
+                      img={item.avatar}
                       isDeleted={item.isDeleted} // Pasar el estado para mostrar visualmente
                       className={
                         item.isDeleted ? "card-desactivado" : "card-activo"
@@ -583,7 +583,7 @@ const Users: React.FC = () => {
                           actionMenuProps={actionMenuProps}
                           item={item}
                           toggleMenuActions={toggleMenuActions}
-                          svg="IconProyectos"
+                          img={item.avatar}
                           isDeleted={item.isDeleted} // Pasar el estado para mostrar visualmente
                           className={
                             item.isDeleted ? "row-desactivado" : "row-activo"

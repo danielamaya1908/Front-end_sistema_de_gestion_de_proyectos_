@@ -38,7 +38,7 @@ const ListView: FC<ListViewProps> = ({
             <IconSVG name={svg} />
           ) : (
             <img
-              src={`http://217.15.168.117:8080/api/Whatever/${img}`}
+              src={`${img}`}
               alt={String(item.id)}
             />
           )}
