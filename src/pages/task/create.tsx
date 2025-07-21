@@ -16,6 +16,7 @@ interface CreateProps {
 interface TaskFormData {
   title: string;
   description: string;
+  status: string;
   priority: string;
   projectId: string;
   assignedTo: string;
@@ -27,6 +28,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",
+    status: "",
     priority: "",
     projectId: "",
     assignedTo: "",
@@ -45,6 +47,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
     return (
       formData.title &&
       formData.description &&
+      formData.status &&
       formData.priority &&
       formData.projectId &&
       formData.assignedTo &&
@@ -67,6 +70,13 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
     { key: "low", value: "low" },
     { key: "medium", value: "medium" },
     { key: "high", value: "high" },
+  ];
+
+  const statusOptions = [
+    { key: "todo", value: "todo" },
+    { key: "in_progress", value: "in_progress" },
+    { key: "review", value: "review" },
+    { key: "done", value: "done" },
   ];
 
   const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
@@ -95,6 +105,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
         {
           title: formData.title,
           description: formData.description,
+          status: formData.status,
           priority: formData.priority,
           projectId: formData.projectId,
           assignedTo: formData.assignedTo,
@@ -114,6 +125,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
       setFormData({
         title: "",
         description: "",
+        status: "",
         priority: "",
         projectId: "",
         assignedTo: "",
@@ -163,7 +175,19 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             onSelectChange={handleChange}
             defaultOption="Selecciona una prioridad"
             value={formData.priority}
-            icon="IconProyectos"
+            icon="IconTareas"
+            required
+          />
+        </div>
+        <div className="modal_form_item">
+          <SelectDashboard
+            label="Estado"
+            name="status"
+            options={statusOptions}
+            onSelectChange={handleChange}
+            defaultOption="Selecciona un estado"
+            value={formData.status}
+            icon="IconTareas"
             required
           />
         </div>
@@ -187,10 +211,11 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             name="assignedTo"
             apiEndpoint={USERS_API_URL}
             method="GET"
+            queryParams={{ role: "developer" }}
             onSelectChange={handleChange}
             defaultOption="Selecciona un usuario"
             value={formData.assignedTo}
-            icon="IconProyectos"
+            icon="IconUsuarios"
             required
             authToken={localStorage.getItem("token") || ""}
           />
