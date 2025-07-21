@@ -8327,13 +8327,13 @@ html::-webkit-scrollbar:horizontal,
 html::-webkit-scrollbar-thumb,
 ::-webkit-scrollbar-thumb {
 
-    background-color: var(--fondo-container);
+    background-color: #1c2e53;
     border-radius: 20px;
 }
 .dexcom-table-container::-webkit-scrollbar-track,
 html::-webkit-scrollbar-track {
 
-    background-color: #566a7f;
+    background-color: #1c2e53;
     border-top-right-radius: 3px 3px;
     border-bottom-right-radius: 3px 3px;
 }
@@ -21366,7 +21366,7 @@ template {
 }
 /*Menu*/
 .dashboard_menu_main{
-    background: #fff;
+    background: #0f0f0f6b;
     padding: 1em;
     border-radius: 1em;
 }
@@ -21377,8 +21377,8 @@ template {
     border-top-right-radius: 1em;
     border-bottom-right-radius: 1em;
     width: 100%;
-    top: 0px;
-    left: 0px;
+    top: 0;
+    left: 0;
     max-width: 20%;
     display: flex;
     flex-direction: column;
@@ -21387,7 +21387,8 @@ template {
     height: 100dvh;
     position: fixed;
     z-index: 100;
-    background-color: #eaeaea;
+    background-color: #000000;
+    backdrop-filter: blur(70px);
     overflow: scroll;
     transition: all .3s;
     /* transform: translateX(-100%); */
@@ -21395,8 +21396,9 @@ template {
 }
 
 .dashboard_menu_logo{
-    width: 120px;
-    margin-bottom: 1em;
+    width: 240px;
+    margin-bottom: 3em;
+    margin-top: 2em;
 }
 .dashboard_menu_logo a{
     width: 100%;
@@ -21477,6 +21479,19 @@ template {
     margin: 0 .5em;
 }
 
+.pagination_controls{
+    display: flex;
+    align-self: self-end;
+    margin-right: 3rem;
+    margin-top: 1rem;
+    align-items: center;
+}
+
+ .pagination_controls button{
+    border-radius: 15px;
+    margin: 0px 15px;
+ }
+
 .arrow_submenu{
     width: 20px;
     height: 20px;
@@ -21494,14 +21509,14 @@ template {
     transform:translateY(-50%) rotate(180deg);
 }
 .active__item_menu{
-    background-color:rgba(94, 179, 25, 0.16);
-    color: #550010 !important;
+    background-color: #0097cd3d;
+    color: #0097cd !important;
 }
 .active__item_menu svg{
     fill: #550010 !important;
 }
 .active__item_menu:hover{
-    background-color:rgba(94, 179, 25, 0.16) !important;
+    background-color:#0097cd !important;
     color: #550010 !important;
 }
 .dashboard_submenu_items{
@@ -21532,7 +21547,7 @@ template {
     border-radius: .5em;
 }
 .dashboard_cerrar_sesion:hover{
-    background-color: rgba(94, 179, 25, 0.16);
+    background-color: #0097cd;
     border: 1px solid #550010 ;
 }
 .dashboard_cerrar_sesion:hover a{
@@ -21801,7 +21816,7 @@ template {
     }
     .main__dashboard_menu_interno::-webkit-scrollbar-thumb{
         border-radius: 10px;
-        background-color: #ffffff !important;
+        background-color: #1c2e53 !important;
         height: 3px;
     }
     .main__dashboard_menu_interno ul li{
@@ -21855,7 +21870,7 @@ template {
     width: 100%;
 }
 .form_content_dashboard{
-    background-color: #00000026;
+    background-color: #ffffff;
     width: 90%;
     margin: 0 10%;
     border-radius: 1em;
@@ -22024,7 +22039,7 @@ template {
 .layout_cards table::-webkit-scrollbar-thumb,
 .modal_info_user_item p::-webkit-scrollbar-thumb{
     border-radius: 10px;
-    background-color: #5eb319 !important;
+    background-color: #1c2e53 !important;
     height: 8px;
 }
 .layout_list_dashboard {
@@ -22210,7 +22225,7 @@ li.menu_acciones_aprobar:hover span{
     border-bottom: 1px solid #000000;
 }
 .layout_list_dashboard table thead tr{
-    position: sticky;
+    position: initial;
     top: 0;
     background-color: #ffffff00;
     z-index: 1;
@@ -22233,7 +22248,7 @@ li.menu_acciones_aprobar:hover span{
     padding: 1em 0;
     cursor: pointer;
     text-align: center;
-    font-weight: 900;
+    font-weight: 400;
     justify-content: center;
 }
 
@@ -23362,7 +23377,7 @@ body {
   font-size: 0.8rem;
   font-weight: var(--bs-body-font-weight);
   line-height: 1.2rem;
-  color: var(--bs-body-color);
+  color: #042141;
   text-align: var(--bs-body-text-align);
   background-color: #eaeaea;
   -webkit-text-size-adjust: 100%;

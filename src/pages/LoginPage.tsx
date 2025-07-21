@@ -5,7 +5,7 @@ const LoginPage = () => (
   <>
     <LoginForm />
     <div className='center column'>
-      <p>
+      <p style={{color: '#94c7ff'}}>
         ¿No tienes cuenta? <Link to="/register" className='a'>Regístrate</Link>
       </p>
       <p>

@@ -30,7 +30,7 @@ const CardView: FC<CardViewProps> = ({
         <IconSVG name={svg} />
       ) : (
         <img
-          src={`http://217.15.168.117:8080/api/Whatever/${img}`}
+          src={`${img}`}
           alt={String(item.id)}
         />
       )}
@@ -42,7 +42,7 @@ const CardView: FC<CardViewProps> = ({
     </div>
     <div className="icon_card_action_content">
       <div className="icon_card_action" onClick={() => toggleMenuActions(item.id)}>
-        <IconSVG name="Icon_menu_puntos_talentic" />
+        <IconSVG name="IconMenuPuntos" />
       </div>
     </div>
     <ActionMenu {...actionMenuProps(item)} />

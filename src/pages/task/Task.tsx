@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from 'react-router-dom';
 import type { MutableRefObject, JSX } from "react";
-import { useNavigate } from 'react-router-dom';
-
 import "bootstrap/dist/css/bootstrap.min.css";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -20,16 +19,30 @@ import SortFilter from "../../components/sortFilter";
 import ListView from "../../components/listView";
 import CardView from "../../components/cardView";
 
-interface ProyectItem {
-  id: number;
+interface TaskItem {
+  id: string;
   name: string;
   description: string;
-  status: string;
+  state: string;
   priority: string;
-  startDate: string;
-  endDate: string;
-  managerId: string;
-  developers: string[];
+  projectId: {
+    _id: string;
+    name: string;
+  };
+  assignedTo: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  estimatedHours: number;
+  actualHours: number;
+  dueDate: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
 }
 
 interface SortConfig {
@@ -40,20 +53,20 @@ interface SortConfig {
 // Tipos para el delete
 type DeleteType = "soft" | "hard";
 
-// Componente para el modal de eliminación de proyectos
+// Componente para el modal de eliminación de tareas
 const DeleteModal: React.FC<{
-  projectName: string;
+  taskName: string;
   onConfirm: (deleteType: DeleteType) => void;
   onCancel: () => void;
-}> = ({ projectName, onConfirm, onCancel }) => {
+}> = ({ taskName, onConfirm, onCancel }) => {
   const [deleteType, setDeleteType] = useState<DeleteType>("soft");
 
   return (
     <div className="delete-modal-content">
       <div className="mb-3">
-        <h5>¿Estás seguro de que deseas eliminar este proyecto?</h5>
+        <h5>¿Estás seguro de que deseas eliminar esta tarea?</h5>
         <p>
-          <strong>Proyecto:</strong> {projectName}
+          <strong>Tarea:</strong> {taskName}
         </p>
       </div>
 
@@ -77,8 +90,8 @@ const DeleteModal: React.FC<{
         </select>
         <div className="form-text">
           {deleteType === "soft"
-            ? "El proyecto será desactivado pero sus datos se mantendrán en la base de datos."
-            : "El proyecto será eliminado permanentemente de la base de datos. Esta acción no se puede deshacer."}
+            ? "La tarea será desactivada pero sus datos se mantendrán en la base de datos."
+            : "La tarea será eliminada permanentemente de la base de datos. Esta acción no se puede deshacer."}
         </div>
       </div>
 
@@ -95,21 +108,22 @@ const DeleteModal: React.FC<{
         >
           {deleteType === "hard"
             ? "Eliminar permanentemente"
-            : "Desactivar proyecto"}
+            : "Desactivar tarea"}
         </button>
       </div>
     </div>
   );
 };
 
-const Projects: React.FC = () => {
-  const [apiData, setApiData] = useState<ProyectItem[]>([]);
+const Tasks: React.FC = () => {
+  const [apiData, setApiData] = useState<TaskItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+
+  const location = useLocation();
+  const { id_proyect } = location.state || {};
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element | null>(null);
-
-  const navigate = useNavigate();
 
   const [activeMenuActions, setActiveMenuActions] = useState<string | null>(
     null
@@ -121,19 +135,15 @@ const Projects: React.FC = () => {
     direction: "desc",
   });
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-
   const token = localStorage.getItem("token");
 
   const showCards = () => setViewType("cards");
   const showList = () => setViewType("list");
 
   const API_URL =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll";
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/get-by-project";
   const DELETE_API_URL =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/delete";
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/delete";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -164,27 +174,27 @@ const Projects: React.FC = () => {
         direction = "asc";
         break;
       case "nombreAsc":
-        key = "username";
+        key = "name";
         direction = "asc";
         break;
       case "nombreDesc":
-        key = "username";
+        key = "name";
         direction = "desc";
         break;
-      case "emailAsc":
-        key = "email";
+      case "descripcionAsc":
+        key = "description";
         direction = "asc";
         break;
-      case "emailDesc":
-        key = "email";
+      case "descripcionDesc":
+        key = "description";
         direction = "desc";
         break;
-      case "tipoAsc":
-        key = "type";
+      case "estadoAsc":
+        key = "state";
         direction = "asc";
         break;
-      case "tipoDesc":
-        key = "type";
+      case "estadoDesc":
+        key = "state";
         direction = "desc";
         break;
       default:
@@ -211,8 +221,7 @@ const Projects: React.FC = () => {
           "Content-Type": "application/json",
         },
         params: {
-          page: currentPage,
-          limit: itemsPerPage,
+          projectId: id_proyect,
         },
       })
       .then((response) => {
@@ -225,19 +234,24 @@ const Projects: React.FC = () => {
 
         const cleanedData = rawData.map((item: any) => ({
           id: item._id,
-          name: item.name,
+          name: item.title,
           description: item.description,
-          status: item.status,
+          state: item.status,
           priority: item.priority,
-          startDate: item.startDate,
-          endDate: item.endDate,
-          managerId: item.managerId,
-          developers: item.developersIds,
+          projectId: item.projectId,
+          assignedTo: item.assignedTo,
+          estimatedHours: item.estimatedHours,
+          actualHours: item.actualHours,
+          dueDate: item.dueDate,
+          createdBy: item.createdBy,
+          createdAt: item.createdAt,
         }));
+
         setApiData(cleanedData);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        console.log(id_proyect)
       });
   };
 
@@ -266,17 +280,21 @@ const Projects: React.FC = () => {
   const filteredData = apiData.filter(
     (item) =>
       (item.name || "").toLowerCase().includes(searchTerm) ||
-      (item.description || "").toLowerCase().includes(searchTerm)
+      (item.description || "").toLowerCase().includes(searchTerm) ||
+      (item.state || "").toLowerCase().includes(searchTerm) ||
+      (item.priority || "").toLowerCase().includes(searchTerm) ||
+      (item.projectId?.name || "").toLowerCase().includes(searchTerm) ||
+      (item.assignedTo?.name || "").toLowerCase().includes(searchTerm)
   );
 
   // Función para manejar la eliminación con el tipo seleccionado
-  const executeDelete = (projectId: string, deleteType: DeleteType) => {
+  const executeDelete = (taskId: string, deleteType: DeleteType) => {
     const requestBody = {
-      projectId: projectId,
+      taskId: taskId,
       deleteType: deleteType,
     };
 
-    console.log("🗑️ Eliminando proyecto:", requestBody);
+    console.log("🗑️ Eliminando tarea:", requestBody);
 
     axios
       .delete(DELETE_API_URL, {
@@ -289,27 +307,27 @@ const Projects: React.FC = () => {
       .then(() => {
         const message =
           deleteType === "hard"
-            ? "Proyecto eliminado permanentemente con éxito"
-            : "Proyecto desactivado con éxito";
+            ? "Tarea eliminada permanentemente con éxito"
+            : "Tarea desactivada con éxito";
         toast.success(message);
         closeModal();
         fetchData();
       })
       .catch((error) => {
-        console.error("Error deleting project:", error);
+        console.error("Error deleting task:", error);
         console.error("Error response:", error.response?.data);
-        toast.error("Error al eliminar el proyecto");
+        toast.error("Error al eliminar la tarea");
         closeModal();
       });
   };
 
   // Función para abrir el modal de eliminación
-  const handleDelete = (projectId: string, projectName: string) => {
+  const handleDelete = (taskId: string, taskName: string) => {
     setIsModalOpen(true);
     setModalContent(
       <DeleteModal
-        projectName={projectName}
-        onConfirm={(deleteType) => executeDelete(projectId, deleteType)}
+        taskName={taskName}
+        onConfirm={(deleteType) => executeDelete(taskId, deleteType)}
         onCancel={closeModal}
       />
     );
@@ -317,61 +335,50 @@ const Projects: React.FC = () => {
 
   const handleCreateClick = (FormComponent: React.ElementType) => {
     setIsModalOpen(true);
-    setModalContent(<FormComponent onSubmitState={handleChangecrear} />);
+    setModalContent(<FormComponent onSubmitState={handleChangecrear} id_default={id_proyect} />);
   };
 
   const handleEditClick = (
     FormComponent: React.ElementType,
-    id: number,
-    name: string,
-    description: string,
-    status: string,
-    priority: string,
-    startDate: string,
-    endDate: string,
-    managerId: string,
-    developers: string[]
+    item: TaskItem
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        idDefault={id}
-        nameDefault={name}
-        descriptionDefault={description}
-        statusDefault={status}
-        priorityDefault={priority}
-        startDateDefault={startDate}
-        endDateDefault={endDate}
-        managerIdDefault={managerId}
-        developersDefault={developers}
+        idDefault={item.id}
+        nameDefault={item.name}
+        descriptionDefault={item.description}
+        stateDefault={item.state}
+        priorityDefault={item.priority}
+        projectIdDefault={id_proyect}
+        assignedToDefault={item.assignedTo}
+        estimatedHoursDefault={item.estimatedHours}
+        actualHoursDefault={item.actualHours}
+        dueDateDefault={item.dueDate}
       />
     );
   };
 
   const handleShowClick = (
     FormComponent: React.ElementType,
-    name: string,
-    description: string,
-    status: string,
-    priority: string,
-    startDate: string,
-    endDate: string,
-    managerId: string,
-    developers: string[]
+    item: TaskItem
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        nameDefault={name}
-        descriptionDefault={description}
-        statusDefault={status}
-        priorityDefault={priority}
-        startDateDefault={startDate}
-        endDateDefault={endDate}
-        managerIdDefault={managerId}
-        developersDefault={developers}
+        nameDefault={item.name}
+        descriptionDefault={item.description}
+        stateDefault={item.state}
+        priorityDefault={item.priority}
+        projectIdDefault={item.projectId}
+        assignedToDefault={item.assignedTo}
+        estimatedHoursDefault={item.estimatedHours}
+        actualHoursDefault={item.actualHours}
+        dueDateDefault={item.dueDate}
+        createdByDefault={item.createdBy}
+        createdAtDefault={item.createdAt}
       />
     );
   };
@@ -385,57 +392,26 @@ const Projects: React.FC = () => {
     }
 
     const isActive = String(activeMenuActions) === String(realItem.id);
-    console.log("Acciones para:", realItem.id, "| isActive:", isActive);
 
     return {
       isActive,
       onClose: () => setActiveMenuActions(null),
       actions: [
         {
-          label: 'Tareas',
-          icon: 'IconPermisos',
-          onClick: () => navigate('/dashboard/allocationTasks', { state: {
-              id_proyect: item.id
-          }}),
-        },
-        {
           label: "Ver",
           icon: "IconVer",
-          onClick: () =>
-            handleShowClick(
-              Show,
-              realItem.name,
-              realItem.description,
-              realItem.status,
-              realItem.priority,
-              realItem.startDate,
-              realItem.endDate,
-              realItem.managerId,
-              realItem.developers
-            ),
+          onClick: () => handleShowClick(Show, realItem),
         },
         {
           label: "Editar",
           icon: "IconEditar",
-          onClick: () =>
-            handleEditClick(
-              Update,
-              realItem.id,
-              realItem.name,
-              realItem.description,
-              realItem.status,
-              realItem.priority,
-              realItem.startDate,
-              realItem.endDate,
-              realItem.managerId,
-              realItem.developers
-            ),
+          onClick: () => handleEditClick(Update, realItem),
           className: "menu_acciones_editar",
         },
         {
           label: "Eliminar",
           icon: "IconEliminar",
-          onClick: () => handleDelete(String(realItem.id), realItem.name),
+          onClick: () => handleDelete(realItem.id, realItem.name),
           className: "menu_acciones_eliminar",
         },
       ],
@@ -447,14 +423,14 @@ const Projects: React.FC = () => {
       <main className="main__dashboard_content">
         <div className="form_content">
           <section className="dashboard_titulo">
-            <h2>Proyectos</h2>
+            <h2>Tareas</h2>
           </section>
           <div className="main__dashboard_primera_parte">
             <div
               className="btn_nuevo_dashboard"
               onClick={() => handleCreateClick(Create)}
             >
-              <IconSVG name="Icon_mas_talentic" /> Crear Nuevo
+              <IconSVG name="Icon_mas_talentic" /> Crear Nueva Tarea
             </div>
           </div>
           <div className="form_content_dashboard">
@@ -481,12 +457,18 @@ const Projects: React.FC = () => {
                     <CardView
                       key={item.id}
                       titulo={item.name}
-                      subtitulo={item.description}
-                      parrafo="2024-08-26 14:01:51"
+                      subtitulo={`${item.description} | Proyecto: ${
+                        item.projectId?.name || "Sin proyecto"
+                      }`}
+                      parrafo={`Estado: ${item.state} | Prioridad: ${
+                        item.priority
+                      } | Asignado a: ${
+                        item.assignedTo?.name || "Sin asignar"
+                      }`}
                       actionMenuProps={actionMenuProps}
                       item={item}
                       toggleMenuActions={toggleMenuActions}
-                      svg="IconProyectos"
+                      svg="IconTareas"
                     />
                   ))
                 ) : (
@@ -500,15 +482,21 @@ const Projects: React.FC = () => {
                     <tr>
                       <th onClick={() => handleSort("nombreAsc")}>
                         <h4>
-                          Nombre
+                          Tarea
                           <IconSVG name="IconFlechas" />
                         </h4>
                       </th>
                       <th>
-                        <h4>Descripción</h4>
+                        <h4>Proyecto</h4>
                       </th>
                       <th>
-                        <h4>Fecha</h4>
+                        <h4>Asignado a</h4>
+                      </th>
+                      <th>
+                        <h4>Estado</h4>
+                      </th>
+                      <th>
+                        <h4>Prioridad</h4>
                       </th>
                       <th>
                         <h4>Acciones</h4>
@@ -521,17 +509,19 @@ const Projects: React.FC = () => {
                         <ListView
                           key={item.id}
                           titulo={item.name}
-                          subtitulo={item.description}
-                          parrafo="2024-08-26 14:01:51"
+                          subtitulo={item.projectId?.name || "Sin proyecto"}
+                          parrafo={`${
+                            item.assignedTo?.name || "Sin asignar"
+                          } | ${item.state} | ${item.priority}`}
                           actionMenuProps={actionMenuProps}
                           item={item}
                           toggleMenuActions={toggleMenuActions}
-                          svg="IconProyectos"
+                          svg="IconTareas"
                         />
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4}>No se encontraron registros</td>
+                        <td colSpan={6}>No se encontraron registros</td>
                       </tr>
                     )}
                   </tbody>
@@ -539,28 +529,13 @@ const Projects: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="pagination_controls">
-            <button
-              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-              disabled={currentPage === 1}
-            >
-              Anterior
-            </button>
-            <span>Página {currentPage} de {totalPages}</span>
-            <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-              disabled={currentPage === totalPages}
-            >
-              Siguiente
-            </button>
-          </div>
         </div>
       </main>
-      <Modal isOpen={isModalOpen} onClose={closeModal} titulo={"Proyectos"}>
+      <Modal isOpen={isModalOpen} onClose={closeModal} titulo={"Tareas"}>
         {modalContent}
       </Modal>
     </div>
   );
 };
 
-export default Projects;
+export default Tasks;

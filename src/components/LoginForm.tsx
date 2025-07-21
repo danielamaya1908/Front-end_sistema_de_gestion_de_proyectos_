@@ -27,11 +27,11 @@ const LoginForm = () => {
     <section className="min-h-screen flex items-center justify-center bg-gray-100">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="bg-white p-8 rounded shadow-md w-full max-w-md"
+        className="bg-white p-5 rounded shadow-md w-full max-w-md d-flex flex-column align-items-center"
       >
         <h1 className="text-2xl font-bold text-center mb-3">Gestion Proyectos</h1>
 
-        <div className="relative m-4">
+        <div className="relative m-2">
           <input
             type="email"
             {...register('email')}
@@ -41,7 +41,7 @@ const LoginForm = () => {
           />
         </div>
 
-        <div className="relative m-4">
+        <div className="relative m-2">
           <input
             type="password"
             {...register('password')}
@@ -52,6 +52,7 @@ const LoginForm = () => {
         </div>
 
         <button
+          style={{ width: '70%' }}
           type="submit"
           className="btn btn-outline-primary btn-outline-info btn_interaction m-1"
         >
