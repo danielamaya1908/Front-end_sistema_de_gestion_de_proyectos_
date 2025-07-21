@@ -30,7 +30,7 @@ const LoginForm = () => {
       .then((response) => {
 
         const data = response.data;
-        localStorage.setItem('user', data?.profile || data?.user || data);
+        localStorage.setItem('user', JSON.stringify(data?.profile || data?.user || data));
         toast.success('Login exitoso');
         navigate('/dashboard');
       })
