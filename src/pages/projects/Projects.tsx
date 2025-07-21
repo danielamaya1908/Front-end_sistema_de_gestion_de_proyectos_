@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import type { MutableRefObject, JSX } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 
 import "bootstrap/dist/css/bootstrap.min.css";
 import { toast } from "react-toastify";
@@ -392,11 +392,14 @@ const Projects: React.FC = () => {
       onClose: () => setActiveMenuActions(null),
       actions: [
         {
-          label: 'Tareas',
-          icon: 'IconPermisos',
-          onClick: () => navigate('/dashboard/allocationTasks', { state: {
-              id_proyect: item.id
-          }}),
+          label: "Tareas",
+          icon: "IconPermisos",
+          onClick: () =>
+            navigate("/dashboard/allocationTasks", {
+              state: {
+                id_proyect: item.id,
+              },
+            }),
         },
         {
           label: "Ver",
@@ -546,9 +549,13 @@ const Projects: React.FC = () => {
             >
               Anterior
             </button>
-            <span>Página {currentPage} de {totalPages}</span>
+            <span>
+              Página {currentPage} de {totalPages}
+            </span>
             <button
-              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             >
               Siguiente
