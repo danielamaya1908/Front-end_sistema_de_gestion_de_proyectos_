@@ -7,6 +7,8 @@ import BtnSubmitDashboard from '../../components/btnSubmitDashboard';
 import TextareaDashboard from '../../components/textareaDashboard';
 import SelectDashboard from '../../components/selectDashboard';
 import InputDashboard from '../../components/inputDashboard';
+import DeveloperSelector from '../../components/searchBox';
+import SelectDashboardApi from '../../components/selectDashboardApi';
 
 interface CreateProps {
   onSubmitState: (success: boolean) => void;
@@ -15,13 +17,27 @@ interface CreateProps {
 interface RoleFormData {
   name: string;
   description: string;
+  status: string;
+  priority: string;
+  startDate: string;
+  endDate: string;
+  managerId: string;
+  developers: string[];
 }
 
 const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
   const [formData, setFormData] = useState<RoleFormData>({
     name: '',
     description: '',
+    status: '',
+    priority: '',
+    startDate: '',
+    endDate: '',
+    managerId: '',
+    developers: [],
   });
+  
+  const API_URL = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll';
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -29,6 +45,18 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
       ...prevState,
       [name]: value
     }));
+  };
+
+  const handleCheckboxChangeAprendiz = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { checked, value } = e.target;
+
+    setFormData(prevState => {
+      const developers = checked
+        ? [...prevState.developers, value]
+        : prevState.developers.filter(dataId => dataId !== value);
+
+      return { ...prevState, developers };
+    });
   };
 
   const priorityOptions = [
@@ -60,7 +88,16 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
 
     try {
       await axios.post('http://217.15.168.117:8080/api/', requestBody);
-      setFormData({ name: '', description: '' });
+      setFormData({ 
+        name: '',
+        description: '',
+        status: '',
+        priority: '',
+        startDate: '',
+        endDate: '',
+        managerId: '',
+        developers: [],
+       });
       onSubmitState(true);
     } catch (error) {
       console.error('Error creating data:', error);
@@ -88,7 +125,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             options={priorityOptions}
             onSelectChange={handleChange}
             defaultOption="Selecciona una prioridad"
-            value={formData.name}
+            value={formData.priority}
             icon="IconProyectos"
           />
         </div>
@@ -99,7 +136,20 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             options={stausOptions}
             onSelectChange={handleChange}
             defaultOption="Selecciona un estado"
-            value={formData.name}
+            value={formData.status}
+            icon="IconProyectos"
+          />
+        </div>
+        <div className='modal_form_item'>
+          <SelectDashboardApi
+            label="Manager"
+            name="managerId"
+            apiEndpoint={API_URL}
+            method="GET"
+            queryParams={{ role: 'manager' }}
+            onSelectChange={handleChange}
+            defaultOption="Selecciona un Manager"
+            value={formData.managerId}
             icon="IconProyectos"
           />
         </div>
@@ -109,7 +159,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             type="date"
             label="Fecha Incio"
             placeholder="Fecha Incio"
-            value={formData.name}
+            value={formData.startDate}
             onChange={handleChange}
             colClassName=""
           />
@@ -120,11 +170,15 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             type="date"
             label="Fecha Final"
             placeholder="Fecha Final"
-            value={formData.name}
+            value={formData.endDate}
             onChange={handleChange}
             colClassName=""
           />
         </div>
+        <DeveloperSelector
+          formData={formData}
+          handleCheckboxChange={handleCheckboxChangeAprendiz}
+        />
         <div className="modal_form_item">
           <TextareaDashboard
             name="description"

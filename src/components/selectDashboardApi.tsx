@@ -3,15 +3,19 @@ import axios from 'axios';
 import IconSVG from './icon';
 
 type Option = {
-  key: string | number;
-  value: string;
+  _id: string | number;
+  name: string;
 };
+
+type HttpMethod = 'GET' | 'POST';
 
 type SelectDashboardProps = {
   label: string;
   name: string;
   apiEndpoint: string;
-  requestBody: any;
+  method?: HttpMethod; // default: GET
+  queryParams?: Record<string, string>;
+  requestBody?: any;
   onSelectChange: (event: React.ChangeEvent<HTMLSelectElement>) => void;
   defaultOption: string;
   value: string | number;
@@ -19,10 +23,12 @@ type SelectDashboardProps = {
   icon: string;
 };
 
-const SelectDashboard = forwardRef<HTMLSelectElement, SelectDashboardProps>(({
+const SelectDashboardApi = forwardRef<HTMLSelectElement, SelectDashboardProps>(({
   label,
   name,
   apiEndpoint,
+  method = 'GET', // Default to GET if not provided
+  queryParams,
   requestBody,
   onSelectChange,
   defaultOption,
@@ -32,15 +38,41 @@ const SelectDashboard = forwardRef<HTMLSelectElement, SelectDashboardProps>(({
 }, ref) => {
   const [options, setOptions] = useState<Option[]>([]);
 
-  useEffect(() => {
-    axios.post(apiEndpoint, requestBody)
-      .then(response => {
-        setOptions(response.data);
-      })
-      .catch(error => {
-        console.error('Error al cargar las opciones:', error);
-      });
-  }, [apiEndpoint, requestBody]);
+useEffect(() => {
+  const fetchOptions = async () => {
+    const token = localStorage.getItem('token');
+
+    const config = {
+      headers: {
+        'session_token': token ?? '',
+        'Content-Type': 'application/json'
+      },
+      params: queryParams || {} // solo se usa en GET
+    };
+
+    try {
+
+
+      const response = method === 'POST'
+        ? await axios.post(apiEndpoint, requestBody || {}, config)
+        : await axios.get(apiEndpoint, config);
+
+      const data = Array.isArray(response.data)
+        ? response.data
+        : Array.isArray(response.data.data)
+          ? response.data.data
+          : [];
+
+          console.log(response);
+
+      setOptions(data);
+    } catch (error) {
+      console.error('Error al cargar las opciones:', error);
+    }
+  };
+
+  fetchOptions();
+}, [apiEndpoint, method, JSON.stringify(requestBody), JSON.stringify(queryParams)]);
 
   return (
     <div className="input_dashboard">
@@ -56,10 +88,11 @@ const SelectDashboard = forwardRef<HTMLSelectElement, SelectDashboardProps>(({
           value={value}
         >
           <option value="">{defaultOption}</option>
-          {options && options.length > 0 ? (
+          {options.length > 0 ? (
+            console.log(options),
             options.map(option => (
-              <option key={option.key} value={option.key}>
-                {option.value}
+              <option key={option._id} value={option._id}>
+                {option.name}
               </option>
             ))
           ) : (
@@ -71,4 +104,4 @@ const SelectDashboard = forwardRef<HTMLSelectElement, SelectDashboardProps>(({
   );
 });
 
-export default SelectDashboard;
+export default SelectDashboardApi;
