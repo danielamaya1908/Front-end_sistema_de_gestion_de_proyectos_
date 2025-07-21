@@ -38,6 +38,8 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
   });
   
   const API_URL = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll';
+  const API_URL_POST = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/create';
+  const token = localStorage.getItem('token');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -74,20 +76,26 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
 
   const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { name, description } = formData;
+    const { name, description, status, priority, startDate, endDate, managerId, developers } = formData;
 
     const requestBody = {
-      API: "talentic",
-      MODEL: "talentic",
-      RESOURCE: "roles",
-      key: "5b8d3b1f084b01c6a8387459e80d4bb9",
-      TYPE: "PUT",
-      name,
-      description
+      name: name,
+      description: description,
+      status:status,
+      priority: priority,
+      startDate: startDate,
+      endDate: endDate,
+      managerId: managerId,
+      developersIds: developers
     };
 
     try {
-      await axios.post('http://217.15.168.117:8080/api/', requestBody);
+      await axios.post(API_URL_POST, requestBody, {
+        headers: {
+          'session_token': token ?? '',
+          'Content-Type': 'application/json',
+        },
+      });
       setFormData({ 
         name: '',
         description: '',
