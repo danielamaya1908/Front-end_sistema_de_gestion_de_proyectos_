@@ -62,22 +62,6 @@ const Navbar: React.FC = () => {
           </Link>
         </li>
 
-        <li className="dashboard_menu_item_drop">
-          <Link
-            to="/dashboard/task"
-            className={`dashboard_menu_item_content ${
-              activeSubMenu === "item_tasks" ? "active__item_menu" : ""
-            }`}
-            onClick={() => {
-              toggleSubMenu("item_tasks");
-              toggleMenu("default_item");
-              handleMenuClick("Tareas");
-            }}
-          >
-            <span>Tareas</span>
-          </Link>
-        </li>
-
         {/* CIERRE DE SESIÓN */}
         <div className="dashboard_menu_exit">
           <li className="dashboard_menu_item dashboard_cerrar_sesion">
