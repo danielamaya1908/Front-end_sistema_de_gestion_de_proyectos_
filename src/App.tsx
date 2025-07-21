@@ -37,7 +37,7 @@ const App = () => {
           <Route index element={<Navigate to="projects" />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="users" element={<UsersPage />} />
-          <Route path="task" element={<TaskPage />} />
+          <Route path="allocationTasks" element={<TaskPage />} />
         </Route>
       </Routes>
     </>
