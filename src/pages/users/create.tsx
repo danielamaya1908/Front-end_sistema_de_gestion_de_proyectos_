@@ -34,7 +34,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "developer",
+    role: "",
     avatar: "",
   });
 
@@ -186,7 +186,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "developer",
+        role: "develo",
         avatar: "",
       });
       setErrors({});
@@ -326,6 +326,31 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
               }}
             >
               {errors.confirmPassword}
+            </div>
+          )}
+        </div>
+
+        <div className="modal_form_item">
+          <InputDashboard
+            name="role"
+            label="Rol de usuario *"
+            placeholder="Ej: developer"
+            value={formData.role}
+            onChange={handleChange}
+            colClassName=""
+          />
+          {errors.role && (
+            <div
+              className="error-message"
+              style={{
+                color: "#dc3545",
+                fontSize: "13px",
+                marginTop: "4px",
+                display: "block",
+                fontWeight: "500",
+              }}
+            >
+              {errors.role}
             </div>
           )}
         </div>

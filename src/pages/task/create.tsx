@@ -1,107 +1,144 @@
-import { useState } from 'react';
-import type { ChangeEvent, FormEvent } from 'react';
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import { useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import { toast } from "react-toastify";
+import axios from "axios";
 
-import BtnSubmitDashboard from '../../components/btnSubmitDashboard';
-import TextareaDashboard from '../../components/textareaDashboard';
-import SelectDashboard from '../../components/selectDashboard';
-import InputDashboard from '../../components/inputDashboard';
-import DeveloperSelector from '../../components/searchBox';
-import SelectDashboardApi from '../../components/selectDashboardApi';
+import BtnSubmitDashboard from "../../components/btnSubmitDashboard";
+import TextareaDashboard from "../../components/textareaDashboard";
+import SelectDashboard from "../../components/selectDashboard";
+import InputDashboard from "../../components/inputDashboard";
+import SelectDashboardApi from "../../components/selectDashboardApi";
 
 interface CreateProps {
   onSubmitState: (success: boolean) => void;
 }
 
-interface RoleFormData {
-  name: string;
+interface TaskFormData {
+  title: string;
   description: string;
-  status: string;
   priority: string;
-  startDate: string;
-  endDate: string;
-  managerId: string;
-  developers: string[];
+  projectId: string;
+  assignedTo: string;
+  estimatedHours: number;
+  dueDate: string;
 }
 
 const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
-  const [formData, setFormData] = useState<RoleFormData>({
-    name: '',
-    description: '',
-    status: '',
-    priority: '',
-    startDate: '',
-    endDate: '',
-    managerId: '',
-    developers: [],
+  const [formData, setFormData] = useState<TaskFormData>({
+    title: "",
+    description: "",
+    priority: "",
+    projectId: "",
+    assignedTo: "",
+    estimatedHours: 0,
+    dueDate: "",
   });
-  
-  const API_URL = 'https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll';
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const USERS_API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
+  const PROJECTS_API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll";
+
+  const validateForm = () => {
+    return (
+      formData.title &&
+      formData.description &&
+      formData.priority &&
+      formData.projectId &&
+      formData.assignedTo &&
+      formData.estimatedHours > 0 &&
+      formData.dueDate
+    );
+  };
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prevState => ({
+    setFormData((prevState) => ({
       ...prevState,
-      [name]: value
+      [name]: name === "estimatedHours" ? Number(value) : value,
     }));
   };
 
-  const handleCheckboxChangeAprendiz = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { checked, value } = e.target;
-
-    setFormData(prevState => {
-      const developers = checked
-        ? [...prevState.developers, value]
-        : prevState.developers.filter(dataId => dataId !== value);
-
-      return { ...prevState, developers };
-    });
-  };
-
   const priorityOptions = [
-    { key: 'low', value: 'low' },
-    { key: 'medium', value: 'medium' },
-    { key: 'high', value: 'high' }
-  ];
-  
-  const stausOptions = [
-    { key: 'planning', value: 'planning' },
-    { key: 'in_progress', value: 'in_progress' },
-    { key: 'completed', value: 'completed' },
-    { key: 'cancelled', value: 'cancelled' }
+    { key: "low", value: "low" },
+    { key: "medium", value: "medium" },
+    { key: "high", value: "high" },
   ];
 
   const handleCreate = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const { name, description } = formData;
 
-    const requestBody = {
-      API: "talentic",
-      MODEL: "talentic",
-      RESOURCE: "roles",
-      key: "5b8d3b1f084b01c6a8387459e80d4bb9",
-      TYPE: "PUT",
-      name,
-      description
-    };
+    if (!validateForm()) {
+      toast.error("Por favor, complete todos los campos requeridos");
+      return;
+    }
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Token de sesión no encontrado. Por favor inicie sesión.");
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
-      await axios.post('http://217.15.168.117:8080/api/', requestBody);
-      setFormData({ 
-        name: '',
-        description: '',
-        status: '',
-        priority: '',
-        startDate: '',
-        endDate: '',
-        managerId: '',
-        developers: [],
-       });
+      console.log("Enviando datos:", formData);
+      console.log("Token:", token);
+
+      const response = await axios.post(
+        "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/create",
+        {
+          title: formData.title,
+          description: formData.description,
+          priority: formData.priority,
+          projectId: formData.projectId,
+          assignedTo: formData.assignedTo,
+          estimatedHours: formData.estimatedHours,
+          dueDate: formData.dueDate,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            session_token: token, // Usando exactamente el header que necesitas
+          },
+        }
+      );
+
+      console.log("Respuesta del servidor:", response.data);
+
+      setFormData({
+        title: "",
+        description: "",
+        priority: "",
+        projectId: "",
+        assignedTo: "",
+        estimatedHours: 0,
+        dueDate: "",
+      });
+
       onSubmitState(true);
+      toast.success("Tarea creada exitosamente");
     } catch (error) {
-      console.error('Error creating data:', error);
-      toast.error('Hubo un error al crear. Por favor, inténtelo de nuevo.');
+      console.error("Error al crear tarea:", error);
+
+      if (axios.isAxiosError(error)) {
+        if (error.response?.status === 401) {
+          toast.error("Sesión expirada. Por favor inicie sesión nuevamente.");
+        } else {
+          toast.error(
+            error.response?.data?.message || "Error al crear la tarea"
+          );
+        }
+      } else {
+        toast.error("Error desconocido al crear la tarea");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -110,15 +147,15 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
       <form className="modal_form" method="POST" onSubmit={handleCreate}>
         <div className="modal_form_item">
           <InputDashboard
-            name="name"
-            label="Nombre"
-            placeholder="nombre"
-            value={formData.name}
+            name="title"
+            label="Título"
+            placeholder="Título de la tarea"
+            value={formData.title}
             onChange={handleChange}
-            colClassName=""
+            required
           />
         </div>
-        <div className='modal_form_item'>
+        <div className="modal_form_item">
           <SelectDashboard
             label="Prioridad"
             name="priority"
@@ -127,69 +164,75 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             defaultOption="Selecciona una prioridad"
             value={formData.priority}
             icon="IconProyectos"
+            required
           />
         </div>
-        <div className='modal_form_item'>
-          <SelectDashboard
-            label="Estado"
-            name="status"
-            options={stausOptions}
-            onSelectChange={handleChange}
-            defaultOption="Selecciona un estado"
-            value={formData.status}
-            icon="IconProyectos"
-          />
-        </div>
-        <div className='modal_form_item'>
+        <div className="modal_form_item">
           <SelectDashboardApi
-            label="Manager"
-            name="managerId"
-            apiEndpoint={API_URL}
+            label="Proyecto"
+            name="projectId"
+            apiEndpoint={PROJECTS_API_URL}
             method="GET"
-            queryParams={{ role: 'manager' }}
             onSelectChange={handleChange}
-            defaultOption="Selecciona un Manager"
-            value={formData.managerId}
+            defaultOption="Selecciona un proyecto"
+            value={formData.projectId}
             icon="IconProyectos"
+            required
+            authToken={localStorage.getItem("token") || ""}
+          />
+        </div>
+        <div className="modal_form_item">
+          <SelectDashboardApi
+            label="Asignar a"
+            name="assignedTo"
+            apiEndpoint={USERS_API_URL}
+            method="GET"
+            onSelectChange={handleChange}
+            defaultOption="Selecciona un usuario"
+            value={formData.assignedTo}
+            icon="IconProyectos"
+            required
+            authToken={localStorage.getItem("token") || ""}
           />
         </div>
         <div className="modal_form_item">
           <InputDashboard
-            name="startDate"
-            type="date"
-            label="Fecha Incio"
-            placeholder="Fecha Incio"
-            value={formData.startDate}
+            name="estimatedHours"
+            type="number"
+            label="Horas estimadas"
+            placeholder="Horas estimadas"
+            value={formData.estimatedHours.toString()}
             onChange={handleChange}
-            colClassName=""
+            min="0"
+            step="0.5"
+            required
           />
         </div>
         <div className="modal_form_item">
           <InputDashboard
-            name="endDate"
+            name="dueDate"
             type="date"
-            label="Fecha Final"
-            placeholder="Fecha Final"
-            value={formData.endDate}
+            label="Fecha límite"
+            placeholder="Fecha límite"
+            value={formData.dueDate}
             onChange={handleChange}
-            colClassName=""
+            required
           />
         </div>
-        <DeveloperSelector
-          formData={formData}
-          handleCheckboxChange={handleCheckboxChangeAprendiz}
-        />
         <div className="modal_form_item">
           <TextareaDashboard
             name="description"
             label="Descripción"
-            placeholder="descripción"
+            placeholder="Descripción detallada de la tarea"
             value={formData.description}
             onChange={handleChange}
-            colClassName=""
+            required
           />
         </div>
-        <BtnSubmitDashboard text="Guardar" />
+        <BtnSubmitDashboard
+          text={isSubmitting ? "Guardando..." : "Guardar"}
+          disabled={isSubmitting}
+        />
       </form>
     </div>
   );

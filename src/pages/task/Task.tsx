@@ -19,16 +19,100 @@ import ListView from "../../components/listView";
 import CardView from "../../components/cardView";
 
 interface TaskItem {
-  id: number;
+  id: string;
   name: string;
   description: string;
-  state?: string;
+  state: string;
+  priority: string;
+  projectId: {
+    _id: string;
+    name: string;
+  };
+  assignedTo: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  estimatedHours: number;
+  actualHours: number;
+  dueDate: string;
+  createdBy: {
+    _id: string;
+    name: string;
+    email: string;
+  };
+  createdAt: string;
 }
 
 interface SortConfig {
   key: string;
   direction: "asc" | "desc";
 }
+
+// Tipos para el delete
+type DeleteType = "soft" | "hard";
+
+// Componente para el modal de eliminación de tareas
+const DeleteModal: React.FC<{
+  taskName: string;
+  onConfirm: (deleteType: DeleteType) => void;
+  onCancel: () => void;
+}> = ({ taskName, onConfirm, onCancel }) => {
+  const [deleteType, setDeleteType] = useState<DeleteType>("soft");
+
+  return (
+    <div className="delete-modal-content">
+      <div className="mb-3">
+        <h5>¿Estás seguro de que deseas eliminar esta tarea?</h5>
+        <p>
+          <strong>Tarea:</strong> {taskName}
+        </p>
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="deleteType" className="form-label">
+          Tipo de eliminación:
+        </label>
+        <select
+          id="deleteType"
+          className="form-select"
+          value={deleteType}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "soft" || value === "hard") {
+              setDeleteType(value);
+            }
+          }}
+        >
+          <option value="soft">Eliminación suave (soft)</option>
+          <option value="hard">Eliminación permanente (hard)</option>
+        </select>
+        <div className="form-text">
+          {deleteType === "soft"
+            ? "La tarea será desactivada pero sus datos se mantendrán en la base de datos."
+            : "La tarea será eliminada permanentemente de la base de datos. Esta acción no se puede deshacer."}
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className={`btn ${
+            deleteType === "hard" ? "btn-danger" : "btn-warning"
+          }`}
+          onClick={() => onConfirm(deleteType)}
+        >
+          {deleteType === "hard"
+            ? "Eliminar permanentemente"
+            : "Desactivar tarea"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Tasks: React.FC = () => {
   const [apiData, setApiData] = useState<TaskItem[]>([]);
@@ -54,6 +138,8 @@ const Tasks: React.FC = () => {
 
   const API_URL =
     "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/getAll";
+  const DELETE_API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/delete";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -124,10 +210,6 @@ const Tasks: React.FC = () => {
   }, []);
 
   const fetchData = () => {
-    console.log("🔗 Fetching data from URL:", API_URL);
-    console.log("🔑 Token being used:", token);
-
-    // Primero probemos sin parámetros, como funciona en proyectos
     axios
       .get(API_URL, {
         headers: {
@@ -136,55 +218,32 @@ const Tasks: React.FC = () => {
         },
       })
       .then((response) => {
-        console.log("✅ Response received:", response);
-        console.log("📊 Response data:", response.data);
-
         const rawData = response.data?.data;
-        console.log("📋 Raw data from API:", rawData);
 
         if (!Array.isArray(rawData)) {
-          console.error(
-            '❌ Error: La propiedad "data" no es un array:',
-            rawData
-          );
-          console.log("🔍 Full response structure:", response.data);
+          console.error('Error: La propiedad "data" no es un array:', rawData);
           return;
         }
 
-        console.log("📝 Number of tasks found:", rawData.length);
+        const cleanedData = rawData.map((item: any) => ({
+          id: item._id,
+          name: item.title,
+          description: item.description,
+          state: item.status,
+          priority: item.priority,
+          projectId: item.projectId,
+          assignedTo: item.assignedTo,
+          estimatedHours: item.estimatedHours,
+          actualHours: item.actualHours,
+          dueDate: item.dueDate,
+          createdBy: item.createdBy,
+          createdAt: item.createdAt,
+        }));
 
-        const cleanedData = rawData.map((item: any) => {
-          console.log("🔄 Processing task item:", item);
-          return {
-            id: item._id,
-            name: item.title, // Cambiado de name a title
-            description: item.description,
-            state: item.status, // Cambiado de state a status
-          };
-        });
-
-        console.log("✨ Cleaned data to set in state:", cleanedData);
         setApiData(cleanedData);
       })
       .catch((error) => {
-        console.error("❌ Error fetching data:", error);
-        console.log("🔍 Error details:", {
-          message: error.message,
-          response: error.response,
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          config: error.config,
-        });
-        console.log("📤 Request that was sent:", {
-          url: error.config?.url,
-          method: error.config?.method,
-          headers: error.config?.headers,
-          data: error.config?.data,
-        });
-        if (error.response?.data) {
-          console.log("📥 Server error response:", error.response.data);
-        }
+        console.error("Error fetching data:", error);
       });
   };
 
@@ -214,30 +273,56 @@ const Tasks: React.FC = () => {
     (item) =>
       (item.name || "").toLowerCase().includes(searchTerm) ||
       (item.description || "").toLowerCase().includes(searchTerm) ||
-      (item.state || "").toLowerCase().includes(searchTerm)
+      (item.state || "").toLowerCase().includes(searchTerm) ||
+      (item.priority || "").toLowerCase().includes(searchTerm) ||
+      (item.projectId?.name || "").toLowerCase().includes(searchTerm) ||
+      (item.assignedTo?.name || "").toLowerCase().includes(searchTerm)
   );
 
-  const handleDelete = (itemId: number) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar esta tarea?")) {
-      const requestBody = {
-        API: "talentic",
-        MODEL: "talentic",
-        RESOURCE: "tasks",
-        key: "5b8d3b1f084b01c6a8387459e80d4bb9",
-        TYPE: "DELETE",
-        id: itemId,
-      };
+  // Función para manejar la eliminación con el tipo seleccionado
+  const executeDelete = (taskId: string, deleteType: DeleteType) => {
+    const requestBody = {
+      taskId: taskId,
+      deleteType: deleteType,
+    };
 
-      axios
-        .post("http://217.15.168.117:8080/api/", requestBody)
-        .then(() => {
-          toast.success("Se eliminaron los datos con éxito");
-          fetchData();
-        })
-        .catch((error) => {
-          console.error("Error deleting data:", error);
-        });
-    }
+    console.log("🗑️ Eliminando tarea:", requestBody);
+
+    axios
+      .delete(DELETE_API_URL, {
+        headers: {
+          session_token: token,
+          "Content-Type": "application/json",
+        },
+        data: requestBody,
+      })
+      .then(() => {
+        const message =
+          deleteType === "hard"
+            ? "Tarea eliminada permanentemente con éxito"
+            : "Tarea desactivada con éxito";
+        toast.success(message);
+        closeModal();
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error deleting task:", error);
+        console.error("Error response:", error.response?.data);
+        toast.error("Error al eliminar la tarea");
+        closeModal();
+      });
+  };
+
+  // Función para abrir el modal de eliminación
+  const handleDelete = (taskId: string, taskName: string) => {
+    setIsModalOpen(true);
+    setModalContent(
+      <DeleteModal
+        taskName={taskName}
+        onConfirm={(deleteType) => executeDelete(taskId, deleteType)}
+        onCancel={closeModal}
+      />
+    );
   };
 
   const handleCreateClick = (FormComponent: React.ElementType) => {
@@ -247,36 +332,45 @@ const Tasks: React.FC = () => {
 
   const handleEditClick = (
     FormComponent: React.ElementType,
-    id: number,
-    name: string,
-    description: string,
-    state?: string
+    item: TaskItem
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        idDefault={id}
-        nameDefault={name}
-        descriptionDefault={description}
-        stateDefault={state}
+        idDefault={item.id}
+        nameDefault={item.name}
+        descriptionDefault={item.description}
+        stateDefault={item.state}
+        priorityDefault={item.priority}
+        projectIdDefault={item.projectId}
+        assignedToDefault={item.assignedTo}
+        estimatedHoursDefault={item.estimatedHours}
+        actualHoursDefault={item.actualHours}
+        dueDateDefault={item.dueDate}
       />
     );
   };
 
   const handleShowClick = (
     FormComponent: React.ElementType,
-    name: string,
-    description: string,
-    state?: string
+    item: TaskItem
   ) => {
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        nameDefault={name}
-        descriptionDefault={description}
-        stateDefault={state}
+        nameDefault={item.name}
+        descriptionDefault={item.description}
+        stateDefault={item.state}
+        priorityDefault={item.priority}
+        projectIdDefault={item.projectId}
+        assignedToDefault={item.assignedTo}
+        estimatedHoursDefault={item.estimatedHours}
+        actualHoursDefault={item.actualHours}
+        dueDateDefault={item.dueDate}
+        createdByDefault={item.createdBy}
+        createdAtDefault={item.createdAt}
       />
     );
   };
@@ -290,7 +384,6 @@ const Tasks: React.FC = () => {
     }
 
     const isActive = String(activeMenuActions) === String(realItem.id);
-    console.log("Acciones para:", realItem.id, "| isActive:", isActive);
 
     return {
       isActive,
@@ -299,31 +392,18 @@ const Tasks: React.FC = () => {
         {
           label: "Ver",
           icon: "IconVer",
-          onClick: () =>
-            handleShowClick(
-              Show,
-              realItem.name,
-              realItem.description,
-              realItem.state
-            ),
+          onClick: () => handleShowClick(Show, realItem),
         },
         {
           label: "Editar",
           icon: "IconEditar",
-          onClick: () =>
-            handleEditClick(
-              Update,
-              realItem.id,
-              realItem.name,
-              realItem.description,
-              realItem.state
-            ),
+          onClick: () => handleEditClick(Update, realItem),
           className: "menu_acciones_editar",
         },
         {
           label: "Eliminar",
           icon: "IconEliminar",
-          onClick: () => handleDelete(realItem.id),
+          onClick: () => handleDelete(realItem.id, realItem.name),
           className: "menu_acciones_eliminar",
         },
       ],
@@ -369,8 +449,14 @@ const Tasks: React.FC = () => {
                     <CardView
                       key={item.id}
                       titulo={item.name}
-                      subtitulo={item.description}
-                      parrafo={item.state || "Sin estado"}
+                      subtitulo={`${item.description} | Proyecto: ${
+                        item.projectId?.name || "Sin proyecto"
+                      }`}
+                      parrafo={`Estado: ${item.state} | Prioridad: ${
+                        item.priority
+                      } | Asignado a: ${
+                        item.assignedTo?.name || "Sin asignar"
+                      }`}
                       actionMenuProps={actionMenuProps}
                       item={item}
                       toggleMenuActions={toggleMenuActions}
@@ -388,15 +474,21 @@ const Tasks: React.FC = () => {
                     <tr>
                       <th onClick={() => handleSort("nombreAsc")}>
                         <h4>
-                          Nombre
+                          Tarea
                           <IconSVG name="IconFlechas" />
                         </h4>
                       </th>
                       <th>
-                        <h4>Descripción</h4>
+                        <h4>Proyecto</h4>
+                      </th>
+                      <th>
+                        <h4>Asignado a</h4>
                       </th>
                       <th>
                         <h4>Estado</h4>
+                      </th>
+                      <th>
+                        <h4>Prioridad</h4>
                       </th>
                       <th>
                         <h4>Acciones</h4>
@@ -409,8 +501,10 @@ const Tasks: React.FC = () => {
                         <ListView
                           key={item.id}
                           titulo={item.name}
-                          subtitulo={item.description}
-                          parrafo={item.state || "Sin estado"}
+                          subtitulo={item.projectId?.name || "Sin proyecto"}
+                          parrafo={`${
+                            item.assignedTo?.name || "Sin asignar"
+                          } | ${item.state} | ${item.priority}`}
                           actionMenuProps={actionMenuProps}
                           item={item}
                           toggleMenuActions={toggleMenuActions}
@@ -419,7 +513,7 @@ const Tasks: React.FC = () => {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={4}>No se encontraron registros</td>
+                        <td colSpan={6}>No se encontraron registros</td>
                       </tr>
                     )}
                   </tbody>
