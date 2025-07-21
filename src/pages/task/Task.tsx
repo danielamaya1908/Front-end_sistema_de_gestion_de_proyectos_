@@ -335,7 +335,7 @@ const Tasks: React.FC = () => {
 
   const handleCreateClick = (FormComponent: React.ElementType) => {
     setIsModalOpen(true);
-    setModalContent(<FormComponent onSubmitState={handleChangecrear} />);
+    setModalContent(<FormComponent onSubmitState={handleChangecrear} id_default={id_proyect} />);
   };
 
   const handleEditClick = (
@@ -351,7 +351,7 @@ const Tasks: React.FC = () => {
         descriptionDefault={item.description}
         stateDefault={item.state}
         priorityDefault={item.priority}
-        projectIdDefault={item.projectId}
+        projectIdDefault={id_proyect}
         assignedToDefault={item.assignedTo}
         estimatedHoursDefault={item.estimatedHours}
         actualHoursDefault={item.actualHours}

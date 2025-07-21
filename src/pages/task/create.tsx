@@ -11,6 +11,7 @@ import SelectDashboardApi from "../../components/selectDashboardApi";
 
 interface CreateProps {
   onSubmitState: (success: boolean) => void;
+  id_default: string;
 }
 
 interface TaskFormData {
@@ -24,13 +25,13 @@ interface TaskFormData {
   dueDate: string;
 }
 
-const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
+const Create: React.FC<CreateProps> = ({ onSubmitState, id_default }) => {
   const [formData, setFormData] = useState<TaskFormData>({
     title: "",
     description: "",
     status: "",
     priority: "",
-    projectId: "",
+    projectId: id_default,
     assignedTo: "",
     estimatedHours: 0,
     dueDate: "",
@@ -127,7 +128,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
         description: "",
         status: "",
         priority: "",
-        projectId: "",
+        projectId: id_default,
         assignedTo: "",
         estimatedHours: 0,
         dueDate: "",
@@ -189,20 +190,6 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             value={formData.status}
             icon="IconTareas"
             required
-          />
-        </div>
-        <div className="modal_form_item">
-          <SelectDashboardApi
-            label="Proyecto"
-            name="projectId"
-            apiEndpoint={PROJECTS_API_URL}
-            method="GET"
-            onSelectChange={handleChange}
-            defaultOption="Selecciona un proyecto"
-            value={formData.projectId}
-            icon="IconProyectos"
-            required
-            authToken={localStorage.getItem("token") || ""}
           />
         </div>
         <div className="modal_form_item">

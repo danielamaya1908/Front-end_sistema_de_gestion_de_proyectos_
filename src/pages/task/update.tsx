@@ -16,10 +16,7 @@ interface UpdateProps {
   descriptionDefault: string;
   stateDefault: string;
   priorityDefault: string;
-  projectIdDefault: {
-    _id: string;
-    name: string;
-  };
+  projectIdDefault: string;
   assignedToDefault: {
     _id: string;
     name: string;
@@ -62,7 +59,7 @@ const Update: React.FC<UpdateProps> = ({
     description: descriptionDefault,
     status: stateDefault,
     priority: priorityDefault,
-    projectId: projectIdDefault?._id || "",
+    projectId: projectIdDefault,
     assignedTo: assignedToDefault?._id || "",
     estimatedHours: estimatedHoursDefault,
     actualHours: actualHoursDefault,
@@ -76,7 +73,7 @@ const Update: React.FC<UpdateProps> = ({
       description: descriptionDefault,
       status: stateDefault,
       priority: priorityDefault,
-      projectId: projectIdDefault?._id || "",
+      projectId: projectIdDefault,
       assignedTo: assignedToDefault?._id || "",
       estimatedHours: estimatedHoursDefault,
       actualHours: actualHoursDefault,
@@ -115,8 +112,6 @@ const Update: React.FC<UpdateProps> = ({
 
   const API_URL_PUT =
     "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/put";
-  const API_URL_PROJECTS =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/projects/getAll";
   const API_URL_USERS =
     "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
   const token = localStorage.getItem("token");
@@ -280,19 +275,6 @@ const Update: React.FC<UpdateProps> = ({
             defaultOption="Selecciona un estado"
             value={formData.status}
             icon="IconTareas"
-          />
-        </div>
-        <div className="modal_form_item">
-          <SelectDashboardApi
-            label="Proyecto"
-            name="projectId"
-            apiEndpoint={API_URL_PROJECTS}
-            method="GET"
-            queryParams={{}}
-            onSelectChange={handleChange}
-            defaultOption="Selecciona un Proyecto"
-            value={formData.projectId}
-            icon="IconProyectos"
           />
         </div>
         <div className="modal_form_item">
