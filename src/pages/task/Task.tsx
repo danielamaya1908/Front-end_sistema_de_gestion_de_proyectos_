@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from 'react-router-dom';
 import type { MutableRefObject, JSX } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { toast } from "react-toastify";
@@ -118,6 +119,9 @@ const Tasks: React.FC = () => {
   const [apiData, setApiData] = useState<TaskItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
+  const location = useLocation();
+  const { id_proyect } = location.state || {};
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [modalContent, setModalContent] = useState<JSX.Element | null>(null);
 
@@ -137,7 +141,7 @@ const Tasks: React.FC = () => {
   const showList = () => setViewType("list");
 
   const API_URL =
-    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/getAll";
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/get-by-project";
   const DELETE_API_URL =
     "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/tasks/delete";
 
@@ -216,6 +220,9 @@ const Tasks: React.FC = () => {
           session_token: token,
           "Content-Type": "application/json",
         },
+        params: {
+          projectId: id_proyect,
+        },
       })
       .then((response) => {
         const rawData = response.data?.data;
@@ -244,6 +251,7 @@ const Tasks: React.FC = () => {
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
+        console.log(id_proyect)
       });
   };
 

@@ -388,7 +388,7 @@ const Projects: React.FC = () => {
           label: 'Tareas',
           icon: 'IconPermisos',
           onClick: () => navigate('/dashboard/allocationTasks', { state: {
-              id: item.id
+              id_proyect: item.id
           }}),
         },
         {
