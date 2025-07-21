@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 import type { MutableRefObject, JSX } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { toast } from "react-toastify";
@@ -33,7 +33,7 @@ interface TaskItem {
     _id: string;
     name: string;
     email: string;
-  };
+  } | null;
   estimatedHours: number;
   actualHours: number;
   dueDate: string;
@@ -115,6 +115,61 @@ const DeleteModal: React.FC<{
   );
 };
 
+// Función para ordenar datos
+const sortData = (data: TaskItem[], config: SortConfig): TaskItem[] => {
+  return [...data].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
+
+    // Manejar diferentes tipos de propiedades
+    switch (config.key) {
+      case "name":
+        aValue = a.name || "";
+        bValue = b.name || "";
+        break;
+      case "description":
+        aValue = a.description || "";
+        bValue = b.description || "";
+        break;
+      case "state":
+        aValue = a.state || "";
+        bValue = b.state || "";
+        break;
+      case "priority":
+        aValue = a.priority || "";
+        bValue = b.priority || "";
+        break;
+      case "createdAt":
+        aValue = new Date(a.createdAt || 0);
+        bValue = new Date(b.createdAt || 0);
+        break;
+      default:
+        aValue = "";
+        bValue = "";
+    }
+
+    // Comparación
+    if (config.key === "createdAt") {
+      // Para fechas, comparación numérica
+      if (config.direction === "asc") {
+        return aValue.getTime() - bValue.getTime();
+      } else {
+        return bValue.getTime() - aValue.getTime();
+      }
+    } else {
+      // Para strings
+      const aString = String(aValue).toLowerCase();
+      const bString = String(bValue).toLowerCase();
+
+      if (config.direction === "asc") {
+        return aString.localeCompare(bString);
+      } else {
+        return bString.localeCompare(aString);
+      }
+    }
+  });
+};
+
 const Tasks: React.FC = () => {
   const [apiData, setApiData] = useState<TaskItem[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -131,7 +186,7 @@ const Tasks: React.FC = () => {
   const menuRef: MutableRefObject<HTMLUListElement | null> = useRef(null);
   const [viewType, setViewType] = useState<"cards" | "list">("cards");
   const [sortConfig, setSortConfig] = useState<SortConfig>({
-    key: "dateCreation",
+    key: "createdAt", // ✅ Corregido: era "dateCreation"
     direction: "desc",
   });
 
@@ -166,11 +221,11 @@ const Tasks: React.FC = () => {
 
     switch (value) {
       case "fechaDesc":
-        key = "dateCreation";
+        key = "createdAt"; // ✅ Corregido: era "dateCreation"
         direction = "desc";
         break;
       case "fechaAsc":
-        key = "dateCreation";
+        key = "createdAt"; // ✅ Corregido: era "dateCreation"
         direction = "asc";
         break;
       case "nombreAsc":
@@ -210,10 +265,14 @@ const Tasks: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log("🔄 Ejecutando fetchData inicial...");
     fetchData();
   }, []);
 
   const fetchData = () => {
+    console.log("📡 Fetching data from API...");
+    console.log("🆔 Project ID:", id_proyect);
+
     axios
       .get(API_URL, {
         headers: {
@@ -225,33 +284,74 @@ const Tasks: React.FC = () => {
         },
       })
       .then((response) => {
+        console.log("✅ Response recibida:", response.data);
         const rawData = response.data?.data;
 
         if (!Array.isArray(rawData)) {
-          console.error('Error: La propiedad "data" no es un array:', rawData);
+          console.error(
+            '❌ Error: La propiedad "data" no es un array:',
+            rawData
+          );
           return;
         }
 
-        const cleanedData = rawData.map((item: any) => ({
-          id: item._id,
-          name: item.title,
-          description: item.description,
-          state: item.status,
-          priority: item.priority,
-          projectId: item.projectId,
-          assignedTo: item.assignedTo,
-          estimatedHours: item.estimatedHours,
-          actualHours: item.actualHours,
-          dueDate: item.dueDate,
-          createdBy: item.createdBy,
-          createdAt: item.createdAt,
-        }));
+        const cleanedData = rawData.map((item: any) => {
+          console.log("🔍 Procesando item:", item);
 
+          // Verificar assignedTo
+          let assignedToProcessed = null;
+          if (item.assignedTo) {
+            if (typeof item.assignedTo === "object" && item.assignedTo._id) {
+              assignedToProcessed = {
+                _id: item.assignedTo._id,
+                name: item.assignedTo.name || "Sin nombre",
+                email: item.assignedTo.email || "",
+              };
+            } else if (typeof item.assignedTo === "string") {
+              // Si es solo un ID
+              assignedToProcessed = {
+                _id: item.assignedTo,
+                name: "Usuario",
+                email: "",
+              };
+            }
+          }
+
+          console.log("👤 AssignedTo procesado:", assignedToProcessed);
+
+          const processedItem = {
+            id: item._id,
+            name: item.title,
+            description: item.description,
+            state: item.status, // ✅ Mantener consistencia: status -> state
+            priority: item.priority,
+            projectId: item.projectId || { _id: "", name: "Sin proyecto" },
+            assignedTo: assignedToProcessed,
+            estimatedHours: item.estimatedHours || 0,
+            actualHours: item.actualHours || 0,
+            dueDate: item.dueDate,
+            createdBy: item.createdBy || {
+              _id: "",
+              name: "Desconocido",
+              email: "",
+            },
+            createdAt: item.createdAt,
+          };
+
+          console.log("✨ Item procesado:", processedItem);
+          return processedItem;
+        });
+
+        console.log("🎯 Todos los datos procesados:", cleanedData);
         setApiData(cleanedData);
       })
       .catch((error) => {
-        console.error("Error fetching data:", error);
-        console.log(id_proyect)
+        console.error("❌ Error fetching data:", error);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+        }
+        console.log("Project ID enviado:", id_proyect);
       });
   };
 
@@ -277,15 +377,20 @@ const Tasks: React.FC = () => {
     setSearchTerm(e.target.value.toLowerCase());
   };
 
-  const filteredData = apiData.filter(
-    (item) =>
-      (item.name || "").toLowerCase().includes(searchTerm) ||
-      (item.description || "").toLowerCase().includes(searchTerm) ||
-      (item.state || "").toLowerCase().includes(searchTerm) ||
-      (item.priority || "").toLowerCase().includes(searchTerm) ||
-      (item.projectId?.name || "").toLowerCase().includes(searchTerm) ||
-      (item.assignedTo?.name || "").toLowerCase().includes(searchTerm)
-  );
+  // ✅ Aplicar filtrado Y ordenamiento
+  const filteredData = apiData.filter((item) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      (item.name || "").toLowerCase().includes(searchLower) ||
+      (item.description || "").toLowerCase().includes(searchLower) ||
+      (item.state || "").toLowerCase().includes(searchLower) ||
+      (item.priority || "").toLowerCase().includes(searchLower) ||
+      (item.projectId?.name || "").toLowerCase().includes(searchLower) ||
+      (item.assignedTo?.name || "").toLowerCase().includes(searchLower)
+    );
+  });
+
+  const filteredAndSortedData = sortData(filteredData, sortConfig);
 
   // Función para manejar la eliminación con el tipo seleccionado
   const executeDelete = (taskId: string, deleteType: DeleteType) => {
@@ -335,7 +440,12 @@ const Tasks: React.FC = () => {
 
   const handleCreateClick = (FormComponent: React.ElementType) => {
     setIsModalOpen(true);
-    setModalContent(<FormComponent onSubmitState={handleChangecrear} id_default={id_proyect} />);
+    setModalContent(
+      <FormComponent
+        onSubmitState={handleChangecrear}
+        id_default={id_proyect}
+      />
+    );
   };
 
   const handleEditClick = (
@@ -418,6 +528,19 @@ const Tasks: React.FC = () => {
     };
   };
 
+  // Debug logs
+  useEffect(() => {
+    console.log("📊 ApiData actualizado:", apiData);
+  }, [apiData]);
+
+  useEffect(() => {
+    console.log("🔍 Término de búsqueda:", searchTerm);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    console.log("🔄 Sort config:", sortConfig);
+  }, [sortConfig]);
+
   return (
     <div className="dashboard_content">
       <main className="main__dashboard_content">
@@ -452,25 +575,28 @@ const Tasks: React.FC = () => {
             </div>
             {viewType === "cards" ? (
               <div className="layout_cards">
-                {filteredData.length > 0 ? (
-                  filteredData.map((item) => (
-                    <CardView
-                      key={item.id}
-                      titulo={item.name}
-                      subtitulo={`${item.description} | Proyecto: ${
-                        item.projectId?.name || "Sin proyecto"
-                      }`}
-                      parrafo={`Estado: ${item.state} | Prioridad: ${
-                        item.priority
-                      } | Asignado a: ${
-                        item.assignedTo?.name || "Sin asignar"
-                      }`}
-                      actionMenuProps={actionMenuProps}
-                      item={item}
-                      toggleMenuActions={toggleMenuActions}
-                      svg="IconTareas"
-                    />
-                  ))
+                {filteredAndSortedData.length > 0 ? (
+                  filteredAndSortedData.map((item) => {
+                    // Preparar la información del usuario asignado
+                    const assignedUserInfo = item.assignedTo
+                      ? item.assignedTo.name
+                      : "Sin asignar";
+
+                    return (
+                      <CardView
+                        key={item.id}
+                        titulo={item.name}
+                        subtitulo={`${item.description} | Proyecto: ${
+                          item.projectId?.name || "Sin proyecto"
+                        }`}
+                        parrafo={`Estado: ${item.state} | Prioridad: ${item.priority} | Asignado a: ${assignedUserInfo}`}
+                        actionMenuProps={actionMenuProps}
+                        item={item}
+                        toggleMenuActions={toggleMenuActions}
+                        svg="IconTareas"
+                      />
+                    );
+                  })
                 ) : (
                   <p>No se encontraron registros</p>
                 )}
@@ -504,21 +630,26 @@ const Tasks: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredData.length > 0 ? (
-                      filteredData.map((item) => (
-                        <ListView
-                          key={item.id}
-                          titulo={item.name}
-                          subtitulo={item.projectId?.name || "Sin proyecto"}
-                          parrafo={`${
-                            item.assignedTo?.name || "Sin asignar"
-                          } | ${item.state} | ${item.priority}`}
-                          actionMenuProps={actionMenuProps}
-                          item={item}
-                          toggleMenuActions={toggleMenuActions}
-                          svg="IconTareas"
-                        />
-                      ))
+                    {filteredAndSortedData.length > 0 ? (
+                      filteredAndSortedData.map((item) => {
+                        // Preparar la información del usuario asignado para la vista de lista
+                        const assignedUserInfo = item.assignedTo
+                          ? item.assignedTo.name
+                          : "Sin asignar";
+
+                        return (
+                          <ListView
+                            key={item.id}
+                            titulo={item.name}
+                            subtitulo={item.projectId?.name || "Sin proyecto"}
+                            parrafo={`${assignedUserInfo} | ${item.state} | ${item.priority}`}
+                            actionMenuProps={actionMenuProps}
+                            item={item}
+                            toggleMenuActions={toggleMenuActions}
+                            svg="IconTareas"
+                          />
+                        );
+                      })
                     ) : (
                       <tr>
                         <td colSpan={6}>No se encontraron registros</td>
