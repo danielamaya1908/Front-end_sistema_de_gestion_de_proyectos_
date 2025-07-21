@@ -34,7 +34,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "",
+    role: "developer",
     avatar: "",
   });
 
@@ -186,7 +186,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
         email: "",
         password: "",
         confirmPassword: "",
-        role: "",
+        role: "developer",
         avatar: "",
       });
       setErrors({});
@@ -217,7 +217,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
           <InputDashboard
             name="name"
             label="Nombre completo *"
-            placeholder="Ej: Daniel Amaya"
+            placeholder="Ej: Juan JavaScript"
             value={formData.name}
             onChange={handleChange}
             colClassName=""
@@ -243,7 +243,7 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
             name="email"
             type="email"
             label="Correo electrónico *"
-            placeholder="Ej: danijcdm.com@gmail.com"
+            placeholder="Ej: user@developer.com"
             value={formData.email}
             onChange={handleChange}
             colClassName=""
@@ -326,31 +326,6 @@ const Create: React.FC<CreateProps> = ({ onSubmitState }) => {
               }}
             >
               {errors.confirmPassword}
-            </div>
-          )}
-        </div>
-
-        <div className="modal_form_item">
-          <InputDashboard
-            name="role"
-            label="Rol de usuario *"
-            placeholder="Ej: developer, admin, user"
-            value={formData.role}
-            onChange={handleChange}
-            colClassName=""
-          />
-          {errors.role && (
-            <div
-              className="error-message"
-              style={{
-                color: "#dc3545",
-                fontSize: "13px",
-                marginTop: "4px",
-                display: "block",
-                fontWeight: "500",
-              }}
-            >
-              {errors.role}
             </div>
           )}
         </div>

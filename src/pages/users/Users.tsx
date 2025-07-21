@@ -22,6 +22,11 @@ interface UserItem {
   id: number;
   name: string;
   description: string;
+  email: string;
+  role: string;
+  avatar: string;
+  isActive: boolean;
+  isDeleted?: boolean;
   state?: string;
 }
 
@@ -29,6 +34,71 @@ interface SortConfig {
   key: string;
   direction: "asc" | "desc";
 }
+
+// Tipos para el delete
+type DeleteType = "soft" | "hard";
+
+// Componente para el modal de eliminación
+const DeleteModal: React.FC<{
+  userName: string;
+  onConfirm: (deleteType: DeleteType) => void;
+  onCancel: () => void;
+}> = ({ userName, onConfirm, onCancel }) => {
+  const [deleteType, setDeleteType] = useState<DeleteType>("soft");
+
+  return (
+    <div className="delete-modal-content">
+      <div className="mb-3">
+        <h5>¿Estás seguro de que deseas eliminar este usuario?</h5>
+        <p>
+          <strong>Usuario:</strong> {userName}
+        </p>
+      </div>
+
+      <div className="mb-3">
+        <label htmlFor="deleteType" className="form-label">
+          Tipo de eliminación:
+        </label>
+        <select
+          id="deleteType"
+          className="form-select"
+          value={deleteType}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "soft" || value === "hard") {
+              setDeleteType(value);
+            }
+          }}
+        >
+          <option value="soft">Eliminación suave (soft)</option>
+          <option value="hard">Eliminación permanente (hard)</option>
+        </select>
+        <div className="form-text">
+          {deleteType === "soft"
+            ? "El usuario será desactivado pero sus datos se mantendrán en la base de datos."
+            : "El usuario será eliminado permanentemente de la base de datos. Esta acción no se puede deshacer."}
+        </div>
+      </div>
+
+      <div className="d-flex justify-content-end gap-2">
+        <button type="button" className="btn btn-secondary" onClick={onCancel}>
+          Cancelar
+        </button>
+        <button
+          type="button"
+          className={`btn ${
+            deleteType === "hard" ? "btn-danger" : "btn-warning"
+          }`}
+          onClick={() => onConfirm(deleteType)}
+        >
+          {deleteType === "hard"
+            ? "Eliminar permanentemente"
+            : "Desactivar usuario"}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const Users: React.FC = () => {
   const [apiData, setApiData] = useState<UserItem[]>([]);
@@ -52,7 +122,12 @@ const Users: React.FC = () => {
   const showCards = () => setViewType("cards");
   const showList = () => setViewType("list");
 
-  const API_URL = "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
+  const API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/getAll";
+  const DELETE_API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/delete";
+  const UPDATE_API_URL =
+    "https://back-endsistemadegestiondeproyectos-production.up.railway.app/api/users/put";
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -130,14 +205,13 @@ const Users: React.FC = () => {
           "Content-Type": "application/json",
         },
         params: {
-          page: 1
+          page: 1,
         },
       })
       .then((response) => {
-
         console.log(response.data);
 
-        const rawData = response.data?.users;
+        const rawData = response.data?.data;
 
         if (!Array.isArray(rawData)) {
           console.error('Error: La propiedad "data" no es un array:', rawData);
@@ -148,6 +222,11 @@ const Users: React.FC = () => {
           id: item._id,
           name: item.name,
           description: item.email,
+          email: item.email,
+          role: item.role || "Developer",
+          avatar: item.avatar || "",
+          isActive: item.isActive !== undefined ? item.isActive : true,
+          isDeleted: item.isDeleted || false,
         }));
         setApiData(cleanedData);
       })
@@ -184,27 +263,93 @@ const Users: React.FC = () => {
       (item.description || "").toLowerCase().includes(searchTerm)
   );
 
-  const handleDelete = (itemId: number) => {
-    if (window.confirm("¿Estás seguro de que deseas eliminar este registro?")) {
-      const requestBody = {
-        API: "talentic",
-        MODEL: "talentic",
-        RESOURCE: "roles",
-        key: "5b8d3b1f084b01c6a8387459e80d4bb9",
-        TYPE: "DELETE",
-        id: itemId,
-      };
+  // Función para activar/desactivar usuario (toggle isDeleted)
+  const handleToggleUserStatus = async (
+    userId: number,
+    currentIsDeleted: boolean,
+    userName: string
+  ) => {
+    const newStatus = !currentIsDeleted;
+    const action = newStatus ? "desactivar" : "activar";
 
-      axios
-        .post("http://217.15.168.117:8080/api/", requestBody)
-        .then(() => {
-          toast.success("Se eliminaron los datos con éxito");
-          fetchData();
-        })
-        .catch((error) => {
-          console.error("Error deleting data:", error);
-        });
+    if (
+      !window.confirm(
+        `¿Estás seguro de que deseas ${action} al usuario "${userName}"?`
+      )
+    ) {
+      return;
     }
+
+    console.log(`🔄 ${action} usuario:`, userId, "isDeleted:", newStatus);
+
+    const requestBody = {
+      userId: String(userId),
+      isDeleted: newStatus,
+    };
+
+    try {
+      await axios.put(UPDATE_API_URL, requestBody, {
+        headers: {
+          session_token: token,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const message = newStatus
+        ? `Usuario "${userName}" desactivado correctamente`
+        : `Usuario "${userName}" activado correctamente`;
+
+      toast.success(message);
+      fetchData(); // Recargar datos
+    } catch (error: any) {
+      console.error("Error updating user status:", error);
+      console.error("Error response:", error.response?.data);
+      toast.error("Error al cambiar el estado del usuario");
+    }
+  };
+
+  // Función para manejar la eliminación con el tipo seleccionado
+  const executeDelete = (userId: number, deleteType: DeleteType) => {
+    const requestBody = {
+      userId: String(userId),
+      deleteType: deleteType,
+    };
+
+    axios
+      .delete(DELETE_API_URL, {
+        headers: {
+          session_token: token,
+          "Content-Type": "application/json",
+        },
+        data: requestBody,
+      })
+      .then(() => {
+        const message =
+          deleteType === "hard"
+            ? "Usuario eliminado permanentemente con éxito"
+            : "Usuario desactivado con éxito";
+        toast.success(message);
+        closeModal();
+        fetchData();
+      })
+      .catch((error) => {
+        console.error("Error deleting user:", error);
+        console.error("Error response:", error.response?.data);
+        toast.error("Error al eliminar el usuario");
+        closeModal();
+      });
+  };
+
+  // Función para abrir el modal de eliminación
+  const handleDelete = (itemId: number, userName: string) => {
+    setIsModalOpen(true);
+    setModalContent(
+      <DeleteModal
+        userName={userName}
+        onConfirm={(deleteType) => executeDelete(itemId, deleteType)}
+        onCancel={closeModal}
+      />
+    );
   };
 
   const handleCreateClick = (FormComponent: React.ElementType) => {
@@ -218,13 +363,26 @@ const Users: React.FC = () => {
     name: string,
     description: string
   ) => {
+    // Buscar el item completo con todos los datos
+    const fullItem = apiData.find((item) => String(item.id) === String(id));
+
+    console.log("📝 Editando usuario:", fullItem);
+
+    if (!fullItem) {
+      toast.error("No se encontraron los datos del usuario");
+      return;
+    }
+
     setIsModalOpen(true);
     setModalContent(
       <FormComponent
         onUPSubmitState={handleChangeeditar}
-        idDefault={id}
-        nameDefault={name}
-        descriptionDefault={description}
+        userId={String(fullItem.id)}
+        nameDefault={fullItem.name}
+        emailDefault={fullItem.email}
+        roleDefault={fullItem.role}
+        avatarDefault={fullItem.avatar}
+        isActiveDefault={fullItem.isActive}
       />
     );
   };
@@ -278,9 +436,22 @@ const Users: React.FC = () => {
           className: "menu_acciones_editar",
         },
         {
+          label: realItem.isDeleted ? "Activar Usuario" : "Desactivar Usuario",
+          icon: realItem.isDeleted ? "IconActivar" : "IconDesactivar", // Puedes usar los íconos que tengas
+          onClick: () =>
+            handleToggleUserStatus(
+              realItem.id,
+              realItem.isDeleted || false,
+              realItem.name
+            ),
+          className: realItem.isDeleted
+            ? "menu_acciones_activar"
+            : "menu_acciones_desactivar",
+        },
+        {
           label: "Eliminar",
           icon: "IconEliminar",
-          onClick: () => handleDelete(realItem.id),
+          onClick: () => handleDelete(realItem.id, realItem.name),
           className: "menu_acciones_eliminar",
         },
       ],
@@ -289,6 +460,43 @@ const Users: React.FC = () => {
 
   return (
     <div className="dashboard_content">
+      <style>{`
+        .card-desactivado {
+          opacity: 0.6;
+          border-left: 4px solid #dc3545 !important;
+        }
+        .card-activo {
+          border-left: 4px solid #28a745 !important;
+        }
+        .row-desactivado {
+          opacity: 0.6;
+          background-color: #f8f9fa;
+        }
+        .row-activo {
+          background-color: inherit;
+        }
+        .menu_acciones_activar {
+          color: #28a745;
+        }
+        .menu_acciones_desactivar {
+          color: #ffc107;
+        }
+        .status-badge {
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: bold;
+          margin-left: 8px;
+        }
+        .status-activo {
+          background-color: #d4edda;
+          color: #155724;
+        }
+        .status-inactivo {
+          background-color: #f8d7da;
+          color: #721c24;
+        }
+      `}</style>
       <main className="main__dashboard_content">
         <div className="form_content">
           <section className="dashboard_titulo">
@@ -332,6 +540,10 @@ const Users: React.FC = () => {
                       item={item}
                       toggleMenuActions={toggleMenuActions}
                       svg="IconProyectos"
+                      isDeleted={item.isDeleted} // Pasar el estado para mostrar visualmente
+                      className={
+                        item.isDeleted ? "card-desactivado" : "card-activo"
+                      }
                     />
                   ))
                 ) : (
@@ -372,6 +584,10 @@ const Users: React.FC = () => {
                           item={item}
                           toggleMenuActions={toggleMenuActions}
                           svg="IconProyectos"
+                          isDeleted={item.isDeleted} // Pasar el estado para mostrar visualmente
+                          className={
+                            item.isDeleted ? "row-desactivado" : "row-activo"
+                          }
                         />
                       ))
                     ) : (
